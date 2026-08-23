@@ -81,9 +81,18 @@
           io.unobserve(el)
         })
       },
-      { rootMargin: '0px 0px -12% 0px', threshold: 0.12 }
+      { rootMargin: '0px 0px -80px 0px', threshold: 0.08 }
     )
     targets.forEach(function (el) { io.observe(el) })
+
+    // A backstop. A percentage rootMargin on a very tall window, a viewport
+    // that never fires, a section skipped by an in-page jump: any of these
+    // leaves something permanently invisible, which is a far worse failure
+    // than an animation that did not play. After three seconds, whatever is
+    // still hidden is simply shown.
+    setTimeout(function () {
+      targets.forEach(function (el) { el.classList.add('in') })
+    }, 3000)
   }
 
   /* --- the notch panel --------------------------------------------------
@@ -145,16 +154,17 @@
     var box = row.querySelector('.box')
     if (!box) return
     var r = box.getBoundingClientRect()
-    var host = row.offsetParent || document.body
-    var h = host.getBoundingClientRect()
+    // Fixed to the viewport and appended to the body, rather than positioned
+    // inside the row. The panel clips its own content, so a leaf parented
+    // anywhere inside it would be cut off on the way up, and hunting for an
+    // offsetParent means quietly making somebody else's element relative.
     var leaf = document.createElement('span')
     leaf.className = 'leaf-pop'
     leaf.setAttribute('aria-hidden', 'true')
-    leaf.style.left = r.left - h.left + r.width / 2 - 5 + 'px'
-    leaf.style.top = r.top - h.top - 4 + 'px'
+    leaf.style.left = r.left + r.width / 2 - 5 + 'px'
+    leaf.style.top = r.top - 4 + 'px'
     leaf.innerHTML = '<svg width="10" height="18" viewBox="0 0 130 240"><use href="#leaf"/></svg>'
-    if (getComputedStyle(host).position === 'static') host.style.position = 'relative'
-    host.appendChild(leaf)
+    document.body.appendChild(leaf)
     setTimeout(function () { leaf.remove() }, 950)
   }
 

@@ -33,6 +33,12 @@
         var t = localStorage.getItem('feuillet.theme')
         if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t
       } catch (e) {}
+      // Everything that animates in is hidden by CSS, and only this class
+      // switches that on. So a browser with no JS, a blocked script or a
+      // parse error gets the whole page rather than a stack of empty
+      // sections. It has to be set before first paint or the reveal would
+      // start from a flash of visible content.
+      document.documentElement.className += ' js'
     </script>
 
     <link rel="stylesheet" href="styles.css" />
@@ -66,6 +72,14 @@
            which is why a finished task and the mark read as one idea. -->
       <symbol id="leaf" viewBox="0 0 130 240">
         <path d="M88 586Q216 654 144 809Q34 732 88 586Z" transform="translate(-20,840) scale(1,-1)" fill="currentColor"/>
+      </symbol>
+
+      <!-- The same blade, upright and with its origin at the stem, so it can
+           be planted on a branch end and rotated to follow it. The path is
+           the wordmark's leaf with the flip already applied and the bounding
+           box moved to 0,0; nothing about the shape is redrawn. -->
+      <symbol id="blade" viewBox="0 0 182 223">
+        <path d="M58 217 Q186 149 114 -6 Q4 71 58 217 Z" fill="currentColor"/>
       </symbol>
 
       <symbol id="check" viewBox="0 0 12 12">
@@ -126,9 +140,15 @@
           <div class="mac">
             <div class="cutout" aria-hidden="true"></div>
 
-            <div class="notch" id="notch" style="--notch-h: 236px">
+            <!-- Two elements, not one. The panel clips its own content so
+                 the open can animate its height, and the inverted corners
+                 live outside that rectangle by definition, so they cannot be
+                 children of the thing doing the clipping. The shell holds
+                 the state class and shrink-wraps the panel. -->
+            <div class="notch-shell" id="notch" style="--notch-h: 236px">
               <span class="notch-ear l" aria-hidden="true"></span>
               <span class="notch-ear r" aria-hidden="true"></span>
+              <div class="notch-panel">
               <div class="notch-strip" aria-hidden="true"></div>
               <div class="notch-body">
                 <div class="notch-sec">
@@ -149,6 +169,7 @@
               <button class="notch-cog" aria-label="Panel settings">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.6v3M12 18.4v3M2.6 12h3M18.4 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2l-2.1 2.1M7.3 16.7l-2.1 2.1"/></svg>
               </button>
+              </div>
             </div>
 
             <div class="menubar">
@@ -161,13 +182,24 @@
               </span>
             </div>
 
+            <!-- An essay being written underneath. The claim being made is
+                 that the panel floats above whatever you are working in and
+                 never takes focus, and that claim needs something to be
+                 above. Decorative, so it is hidden from readers. -->
             <div class="screen">
-              <p class="screen-hint">
-                <button class="btn" id="notch-toggle" style="height: 36px; font-size: 14px">Open the panel</button>
-                <br /><br />
-                It hangs out of the notch, above whatever you are working in,
-                and never takes focus.
-              </p>
+              <div class="doc" aria-hidden="true">
+                <span class="l" style="width: 34%; height: 9px; opacity: 0.5"></span>
+                <span class="l" style="width: 92%"></span>
+                <span class="l" style="width: 88%"></span>
+                <span class="l" style="width: 95%"></span>
+                <span class="l" style="width: 61%"></span>
+                <span class="l" style="width: 90%"></span>
+                <span class="l" style="width: 47%"></span>
+              </div>
+              <div class="screen-foot">
+                <button class="btn" id="notch-toggle">Open the panel</button>
+                <p class="screen-hint">It floats above whatever you are working in, and never takes focus.</p>
+              </div>
             </div>
           </div>
           <div class="mac-foot" aria-hidden="true"></div>
@@ -238,7 +270,7 @@
 
               <div class="gut">08:30</div>
               <div class="cell"><span class="klass fr">MAT536</span></div>
-              <div class="cell"><span class="klass fr">PHY504</span><span class="item due" style="transition-delay: 60ms"><span class="t">rem.</span><span class="fr">Labo, rapport</span></span></div>
+              <div class="cell"><span class="klass fr">PHY504</span><span class="item due" style="transition-delay: 60ms"><span class="fr">Labo, rapport</span></span></div>
               <div class="cell"><span class="klass fr">MAT536</span></div>
               <div class="cell"><span class="klass fr">ANG406</span><span class="item exam" style="transition-delay: 120ms"><span class="fr">Exam, unité 3</span></span></div>
               <div class="cell"><span class="klass fr">PHY504</span></div>
@@ -377,10 +409,12 @@
             <div class="rise" id="panel-demo-wrap">
               <div class="panel" style="padding: 30px; display: grid; place-items: center; background: #0b0a09; border-color: #24221f">
                 <div style="width: 300px; color: #f0ede7">
-                  <div class="notch-lab" style="margin-bottom: 10px"><span>Up next</span><span class="stamp">Try it</span></div>
-                  <div class="nrow" data-tick><span class="box"><svg viewBox="0 0 12 12"><use href="#check"/></svg></span><span class="txt fr">Dissertation, brouillon</span><span class="when">Tue</span></div>
-                  <div class="nrow" data-tick><span class="box"><svg viewBox="0 0 12 12"><use href="#check"/></svg></span><span class="txt fr">Exercices de maths</span><span class="when">Wed</span></div>
-                  <div class="nrow" data-tick><span class="box"><svg viewBox="0 0 12 12"><use href="#check"/></svg></span><span class="txt fr">Révision, unité 3</span><span class="when">Thu</span></div>
+                  <div class="notch-sec">
+                    <div class="notch-lab" style="margin-bottom: 10px"><span>Up next</span><span class="stamp">Try it</span></div>
+                    <div class="nrow" data-tick><span class="box"><svg viewBox="0 0 12 12"><use href="#check"/></svg></span><span class="txt fr">Dissertation, brouillon</span><span class="when">Tue</span></div>
+                    <div class="nrow" data-tick><span class="box"><svg viewBox="0 0 12 12"><use href="#check"/></svg></span><span class="txt fr">Exercices de maths</span><span class="when">Wed</span></div>
+                    <div class="nrow" data-tick><span class="box"><svg viewBox="0 0 12 12"><use href="#check"/></svg></span><span class="txt fr">Révision, unité 3</span><span class="when">Thu</span></div>
+                  </div>
                   <div class="notch-sec">
                     <div class="notch-lab"><span>Study block</span></div>
                     <div style="display: flex; align-items: baseline; gap: 10px; padding: 2px 6px">
@@ -410,7 +444,97 @@
               in the same way, once a term.
             </p>
           </div>
-          <div class="grid grid-3 rise" style="margin-top: 46px">
+          <!-- The spread, and what comes off it. Handwriting is drawn as
+               wobbled paths rather than set in a script face: a script font
+               reads as a font, and the claim being made is that this is
+               somebody's actual pen. Decorative, so it is hidden. -->
+          <div class="capture rise">
+            <div class="spread" aria-hidden="true">
+              <div class="page">
+                <span class="ruled"></span><span class="ruled"></span><span class="ruled"></span>
+                <span class="ruled"></span><span class="ruled"></span><span class="ruled"></span>
+                <div class="ink">
+<svg viewBox="0 0 130 96">
+                    <path d="M6 12.788599317799795q2.6 -3.9 5.2 0q2.6 -2.0 5.2 0q2.6 -4.0 5.2 0q2.6 -2.1 5.2 0q2.6 -3.6 5.2 0"/>
+                    <path d="M17.79666453146246 13q1.4 -8 2.6 -1.2"/>
+                    <path d="M36.61248697532595 12.920374820394864q2.8 -4.0 5.7 0q2.8 -2.8 5.7 0q2.8 -3.5 5.7 0"/>
+                    <path d="M58.48389285877489 12.667886757528418q3.1 -3.2 6.2 0q3.1 -1.6 6.2 0q3.1 -3.3 6.2 0q3.1 -2.3 6.2 0q3.1 -2.7 6.2 0"/>
+                    <path d="M77.99015397402943 13q1.4 -8 2.6 -1.2"/>
+                    <path d="M6 36.57310610002892q2.8 -3.9 5.5 0q2.8 -2.5 5.5 0q2.8 -3.0 5.5 0q2.8 -2.6 5.5 0"/>
+                    <path d="M34.41674040677855 36.84687705127088q2.8 -3.3 5.7 0q2.8 -2.8 5.7 0q2.8 -4.0 5.7 0q2.8 -2.6 5.7 0q2.8 -3.1 5.7 0q2.8 -2.3 5.7 0"/>
+                    <path d="M51.17129208640841 37q1.4 -8 2.6 -1.2"/>
+                    <path d="M74.27629353589089 36.75972039623642q3.5 -3.0 7.0 0q3.5 -1.9 7.0 0"/>
+                    <path d="M81.09725950770158 37q1.4 -8 2.6 -1.2"/>
+                    <path d="M94.35188304732525 37.450164994688116q3.3 -3.1 6.7 0q3.3 -2.5 6.7 0q3.3 -2.7 6.7 0"/>
+                    <path d="M102.53311126517752 37q1.4 -8 2.6 -1.2"/>
+                    <path d="M6 60.5823814415926q2.9 -3.4 5.8 0q2.9 -2.8 5.8 0q2.9 -3.2 5.8 0q2.9 -1.8 5.8 0q2.9 -3.3 5.8 0"/>
+                    <path d="M40.44124253854429 61.23435443952839q3.2 -3.3 6.3 0q3.2 -2.1 6.3 0q3.2 -3.5 6.3 0"/>
+                    <path d="M6 84.96891800490357q3.0 -3.2 6.0 0q3.0 -2.8 6.0 0q3.0 -3.1 6.0 0q3.0 -2.0 6.0 0"/>
+                    <path d="M36.96577435982914 84.74151463851298q2.7 -3.6 5.4 0q2.7 -2.0 5.4 0q2.7 -4.1 5.4 0q2.7 -2.3 5.4 0q2.7 -3.9 5.4 0"/>
+                    <path d="M43.161659020801835 85q1.4 -8 2.6 -1.2"/>
+                    <path d="M70.77047332524671 84.55520826642243q2.7 -3.8 5.3 0q2.7 -2.4 5.3 0q2.7 -2.9 5.3 0"/>
+                    <path d="M77.56397253284136 85q1.4 -8 2.6 -1.2"/>
+                    <path d="M92.91879305267882 85.46006059172981q2.8 -3.0 5.5 0q2.8 -1.7 5.5 0q2.8 -3.7 5.5 0q2.8 -2.3 5.5 0"/>
+                    <path d="M107.04491415185922 85q1.4 -8 2.6 -1.2"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="page">
+                <span class="ruled"></span><span class="ruled"></span><span class="ruled"></span>
+                <span class="ruled"></span><span class="ruled"></span><span class="ruled"></span>
+                <div class="ink">
+<svg viewBox="0 0 130 96">
+                    <path d="M6 12.58110508694933q2.6 -3.9 5.2 0q2.6 -2.6 5.2 0q2.6 -3.8 5.2 0q2.6 -2.2 5.2 0"/>
+                    <path d="M32.28823985789562 12.404912324062076q2.8 -3.5 5.6 0q2.8 -2.4 5.6 0q2.8 -3.3 5.6 0q2.8 -1.6 5.6 0q2.8 -3.1 5.6 0"/>
+                    <path d="M6 37.2114400989394q2.8 -4.0 5.5 0q2.8 -1.6 5.5 0q2.8 -3.0 5.5 0q2.8 -1.7 5.5 0q2.8 -3.0 5.5 0q2.8 -2.4 5.5 0"/>
+                    <path d="M14.308362046220351 37q1.4 -8 2.6 -1.2"/>
+                    <path d="M45.40286869705713 36.47469738594243q3.8 -4.0 7.5 0q3.8 -2.6 7.5 0"/>
+                    <path d="M50.9532710887997 37q1.4 -8 2.6 -1.2"/>
+                    <path d="M65.06059550872793 36.40027993828163q3.0 -3.9 6.0 0q3.0 -2.8 6.0 0q3.0 -3.6 6.0 0q3.0 -2.9 6.0 0"/>
+                    <path d="M6 60.57826058239707q3.2 -3.7 6.3 0q3.2 -2.4 6.3 0q3.2 -3.6 6.3 0"/>
+                    <path d="M17.86490080160384 61q1.4 -8 2.6 -1.2"/>
+                    <path d="M32.47930816511414 60.95918735099192q3.0 -3.4 6.0 0q3.0 -2.8 6.0 0q3.0 -4.0 6.0 0q3.0 -2.4 6.0 0q3.0 -3.7 6.0 0"/>
+                    <path d="M67.46362399669343 60.427714865254295q2.6 -2.8 5.2 0q2.6 -2.2 5.2 0q2.6 -3.9 5.2 0q2.6 -2.1 5.2 0"/>
+                    <path d="M77.20877312654565 61q1.4 -8 2.6 -1.2"/>
+                    <path d="M95.89912772485035 61.435990036347604q2.8 -3.1 5.7 0q2.8 -2.5 5.7 0q2.8 -3.6 5.7 0"/>
+                    <path d="M105.86059994626761 61q1.4 -8 2.6 -1.2"/>
+                    <path d="M6 85.3348658696058q2.6 -3.6 5.2 0q2.6 -2.6 5.2 0q2.6 -3.0 5.2 0q2.6 -1.5 5.2 0q2.6 -2.9 5.2 0"/>
+                    <path d="M38.95499882997612 85.28784762445086q3.5 -3.8 7.0 0q3.5 -2.2 7.0 0"/>
+                    <path d="M41.957859885165675 85q1.4 -8 2.6 -1.2"/>
+                  </svg>
+                </div>
+              </div>
+              <span class="fold"></span>
+            </div>
+
+            <div class="arrowcol" aria-hidden="true">
+              <svg width="30" height="16" viewBox="0 0 30 16" fill="none" stroke="var(--ink-3)" stroke-width="1.5" stroke-linecap="round"><path d="M1 8h26M21 2l6 6-6 6"/></svg>
+            </div>
+
+            <div class="drafts">
+              <div class="notch-lab" style="color: var(--ink-3); margin-bottom: 10px">
+                <span>Read from the photo</span><span class="stamp">3 drafts</span>
+              </div>
+              <div class="draft">
+                <span class="p">P2</span>
+                <span><b class="fr">Labo de chimie, rapport</b><em class="meta">Tue 25 · CHI504</em></span>
+                <span class="ok"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg></span>
+              </div>
+              <div class="draft">
+                <span class="p">P4</span>
+                <span><b class="fr">Lecture, chapitre 4</b><em class="meta">Wed 26 · FRA503</em></span>
+                <span class="ok"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg></span>
+              </div>
+              <div class="draft">
+                <span class="p">P1</span>
+                <span><b class="fr">Exposé oral, plan</b><em class="meta">Fri 28 · ANG406</em></span>
+                <span class="ok"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg></span>
+              </div>
+              <p class="meta" style="margin-top: 12px">Nothing is written until you say so.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-3 rise" style="margin-top: 22px">
             <article class="card">
               <span class="meta">01</span>
               <h3 class="h-card" style="margin-top: 10px">Two pages, one shot</h3>
@@ -558,7 +682,7 @@
             </div>
 
             <div class="conn">
-              <span class="mark"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.9" stroke-linecap="round"><path d="M12 3.5 21 8l-9 4.5L3 8z"/><path d="M7 10.5V15c0 1.5 2.2 2.8 5 2.8s5-1.3 5-2.8v-4.5M19.5 9.2v5"/></svg></span>
+              <span class="mark"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20.5V9.2l8-5 8 5v11.3"/><path d="M2.5 20.5h19M9.5 20.5v-5.2h5v5.2M10 10.2h4"/></svg></span>
               <div>
                 <div class="name">Your school portal</div>
                 <div class="why">Marks, class averages and your real timetable with rooms and teachers. Add as many logins as you have.</div>
@@ -665,19 +789,21 @@
             </p>
           </div>
           <div class="tree-art rise" id="treeart">
-            <svg width="220" height="230" viewBox="0 0 220 230" fill="none" role="img" aria-label="A small tree grown from finished work">
-              <path class="branch" d="M110 226V128"/>
-              <path class="branch" d="M110 168c-20-6-34-20-40-38"/>
-              <path class="branch" d="M110 148c18-5 30-17 36-33"/>
-              <path class="branch" d="M110 128c-12-8-19-19-21-32"/>
-              <path class="branch" d="M110 122c14-9 21-22 22-36"/>
-              <g class="lf" style="animation-delay: 80ms"><ellipse cx="66" cy="126" rx="13" ry="7" transform="rotate(-32 66 126)"/></g>
-              <g class="lf" style="animation-delay: 180ms"><ellipse cx="150" cy="112" rx="13" ry="7" transform="rotate(28 150 112)"/></g>
-              <g class="lf" style="animation-delay: 280ms"><ellipse cx="86" cy="92" rx="12" ry="6.5" transform="rotate(-40 86 92)"/></g>
-              <g class="lf" style="animation-delay: 380ms"><ellipse cx="134" cy="82" rx="12" ry="6.5" transform="rotate(36 134 82)"/></g>
-              <g class="lf" style="animation-delay: 480ms"><ellipse cx="110" cy="62" rx="11" ry="6" transform="rotate(-8 110 62)"/></g>
-              <g class="lf" style="animation-delay: 580ms"><ellipse cx="96" cy="146" rx="10" ry="5.5" transform="rotate(-22 96 146)"/></g>
-              <g class="lf" style="animation-delay: 680ms"><ellipse cx="128" cy="160" rx="10" ry="5.5" transform="rotate(20 128 160)"/></g>
+            <svg width="270" height="290" viewBox="0 0 270 290" fill="none" role="img" aria-label="A small tree grown from finished work">
+              <path class="branch" d="M135 286V150"/>
+              <path class="branch" d="M135 214c-26-8-44-26-52-50"/>
+              <path class="branch" d="M135 188c24-7 40-23 47-44"/>
+              <path class="branch" d="M135 150c-16-11-25-26-27-43"/>
+              <path class="branch" d="M135 140c19-12 28-30 29-49"/>
+              <path class="branch" d="M135 104c-5-14-4-28 2-41"/>
+              <g class="lf" style="animation-delay: 60ms"><use href="#blade" width="34" height="42" transform="translate(83 164) rotate(-46.1) translate(-17 -42)"/></g>
+              <g class="lf" style="animation-delay: 150ms"><use href="#blade" width="34" height="42" transform="translate(182 144) rotate(46.9) translate(-17 -42)"/></g>
+              <g class="lf" style="animation-delay: 240ms"><use href="#blade" width="31" height="38" transform="translate(108 107) rotate(-32.1) translate(-15.5 -38)"/></g>
+              <g class="lf" style="animation-delay: 330ms"><use href="#blade" width="31" height="38" transform="translate(164 91) rotate(30.6) translate(-15.5 -38)"/></g>
+              <g class="lf" style="animation-delay: 420ms"><use href="#blade" width="29" height="36" transform="translate(137 63) rotate(2.8) translate(-14.5 -36)"/></g>
+              <g class="lf" style="animation-delay: 510ms"><use href="#blade" width="26" height="32" transform="translate(105 190) rotate(-51.3) translate(-13 -32)"/></g>
+              <g class="lf" style="animation-delay: 600ms"><use href="#blade" width="26" height="32" transform="translate(159 167) rotate(48.8) translate(-13 -32)"/></g>
+              <g class="lf" style="animation-delay: 690ms"><use href="#blade" width="26" height="32" transform="translate(135 232) rotate(0.0) translate(-13 -32)"/></g>
             </svg>
           </div>
         </div>

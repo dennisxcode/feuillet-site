@@ -180,8 +180,12 @@ body::before {
 h1, h2, h3 { font-weight: 500; line-height: 1.08; letter-spacing: 0; }
 
 .h-hero {
-  font-size: clamp(46px, 8.4vw, 112px);
-  line-height: 0.97;
+  /* Two lines at desktop width, which is what the sentence wants: the
+     subject on one line and the promise on the next. At 8.4vw it ran to four
+     and pushed the buttons off the fold, which is the one thing a hero
+     cannot do. */
+  font-size: clamp(40px, 6.2vw, 88px);
+  line-height: 1.0;
   font-weight: 500;
 }
 
@@ -273,10 +277,14 @@ section { position: relative; }
 .band.tight { padding-block: clamp(64px, 8vw, 104px); }
 .band.no-rule { border-top: 0; }
 
-.head { max-width: 30ch; }
-.head .lede { margin-top: 22px; }
+/* ch on the container is measured against the container's own font size,
+   which is 17px, so a 30ch head gave a 56px heading a 320px column and broke
+   every section title over five lines. The measure has to be set on the
+   heading itself, where 1ch is a character of the size actually being set. */
+.head { max-width: 780px; }
+.head .h-section { max-width: 19ch; }
+.head .lede { margin-top: 22px; max-width: 42ch; }
 .head .eyebrow { margin-bottom: 20px; }
-.head-wide { max-width: 46ch; }
 
 /* --- nav ----------------------------------------------------------------- */
 .nav {
@@ -390,7 +398,7 @@ section { position: relative; }
    HERO
    ======================================================================== */
 .hero {
-  padding-top: clamp(64px, 9vw, 116px);
+  padding-top: clamp(52px, 6.5vw, 92px);
   padding-bottom: clamp(40px, 5vw, 64px);
   position: relative;
   overflow: hidden;
@@ -411,16 +419,20 @@ section { position: relative; }
   z-index: -1;
 }
 
-.hero-copy { max-width: 20ch; }
-.hero h1 { margin-top: 24px; }
-.hero .lede { margin-top: 26px; max-width: 40ch; }
+/* 890px, which is two lines of the headline at its largest and never more.
+   This was briefly 14ch on narrow screens, which measures 14 characters of
+   the container's own 17px text and therefore squeezed the whole hero into
+   130px. A measure meant for a heading has to be set on the heading. */
+.hero-copy { max-width: 890px; }
+.hero h1 { margin-top: 22px; }
+.hero .lede { margin-top: 24px; max-width: 46ch; }
 
 .hero-cta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 12px;
-  margin-top: 34px;
+  margin-top: 30px;
 }
 .hero-note { margin-top: 16px; font-size: 13.5px; color: var(--ink-3); }
 
@@ -476,21 +488,45 @@ section { position: relative; }
 }
 
 .screen {
-  height: clamp(230px, 30vw, 330px);
+  height: clamp(250px, 31vw, 356px);
   background:
     radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--accent) 7%, transparent) 0%, transparent 60%),
     var(--canvas);
   border-radius: 0 0 3px 3px;
   position: relative;
   overflow: hidden;
-  display: grid;
-  place-items: center;
 }
+
+/* The work underneath. Pushed off to one side so the panel is never sitting
+   on top of it, and held well back, because it is the thing being ignored. */
+.doc {
+  position: absolute;
+  left: 6%;
+  top: 26px;
+  width: 25%;
+  display: grid;
+  gap: 11px;
+  opacity: 0.5;
+}
+.doc .l { display: block; height: 6px; border-radius: 3px; background: var(--surface-2); }
+@media (max-width: 700px) { .doc { display: none; } }
+
+.screen-foot {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 22px;
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding-inline: 20px;
+}
+.screen-foot .btn { height: 36px; font-size: 14px; }
 .screen-hint {
   font-size: 13px;
   color: var(--ink-3);
   text-align: center;
-  padding: 0 20px;
+  max-width: 40ch;
 }
 
 .mac-foot {
@@ -509,38 +545,50 @@ section { position: relative; }
    width opens first with height 100ms behind, inverted corners where it
    meets the top edge, and a genie on the way out.
    ---------------------------------------------------------------------- */
-.notch {
+/* The shell is the positioned, unclipped box. It shrink-wraps the panel, so
+   the ears hung off its two sides stay glued to the panel's edges while the
+   width animates. */
+.notch-shell {
   position: absolute;
   left: 50%;
   top: 0;
   z-index: 4;
   transform: translateX(-50%);
+  transition: filter 260ms var(--ease), opacity 200ms var(--ease);
+}
+
+.notch-panel {
   width: 168px;
+  height: 30px;
   overflow: hidden;
   background: #0b0a09;
   color: #f0ede7;
   border-radius: 0 0 13px 13px;
-  box-shadow: 0 18px 40px -12px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 22px 50px -10px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(240, 237, 231, 0.07);
   /* Width first, height 100ms behind. At 200ms they read as two events; at
      100ms as one motion with a hinge. */
   transition:
     width 420ms var(--spring),
-    height 420ms var(--spring) 100ms,
-    opacity 200ms var(--ease),
-    filter 260ms var(--ease);
-  height: 30px;
+    height 420ms var(--spring) 100ms;
 }
-.notch.is-open { width: 340px; height: var(--notch-h, 232px); }
+.notch-shell.is-open .notch-panel { width: 340px; height: var(--notch-h, 232px); }
 
 /* The genie. It warps the panel's own pixels rather than cropping its
    outline, which is the only version that reads as a genie at all. */
-.notch.is-closing {
-  transition: width 260ms cubic-bezier(0.6, 0, 0.9, 0.4),
-    height 260ms cubic-bezier(0.6, 0, 0.9, 0.4),
-    opacity 260ms ease-in,
-    filter 260ms ease-in;
+.notch-shell.is-closing {
+  transition: filter 260ms ease-in, opacity 260ms ease-in;
   filter: blur(6px);
   opacity: 0;
+}
+/* The size has to come back down here too. Restyling only the transition
+   left the panel full size behind the fade, so it blurred out and then the
+   collapsed panel appeared, which is a cut rather than a genie. Gathering
+   first and then accelerating is the whole character of the curve. */
+.notch-shell.is-closing .notch-panel {
+  width: 168px;
+  height: 30px;
+  transition: width 260ms cubic-bezier(0.6, 0, 0.9, 0.4),
+    height 260ms cubic-bezier(0.6, 0, 0.9, 0.4);
 }
 
 /* Inverted corners, 13px, where the panel meets the top edge. Slightly
@@ -556,7 +604,7 @@ section { position: relative; }
   transition: opacity 200ms var(--ease) 220ms;
   background: radial-gradient(circle at var(--cx) 100%, transparent 0 13px, #0b0a09 13.5px);
 }
-.notch.is-open .notch-ear { opacity: 1; }
+.notch-shell.is-open .notch-ear { opacity: 1; }
 .notch-ear.l { left: -13px; --cx: 0%; }
 .notch-ear.r { right: -13px; --cx: 100%; }
 
@@ -566,7 +614,7 @@ section { position: relative; }
   transform: translateY(-6px);
   transition: opacity 220ms var(--ease) 180ms, transform 300ms var(--spring) 180ms;
 }
-.notch.is-open .notch-body { opacity: 1; transform: none; }
+.notch-shell.is-open .notch-body { opacity: 1; transform: none; }
 
 /* The strip below the cutout: 30px of dead space the hardware owns. */
 .notch-strip { height: 24px; }
@@ -624,7 +672,7 @@ section { position: relative; }
   opacity: 0;
   transition: opacity 200ms var(--ease) 260ms, color 160ms var(--ease);
 }
-.notch.is-open .notch-cog { opacity: 1; }
+.notch-shell.is-open .notch-cog { opacity: 1; }
 .notch-cog:hover { color: rgba(240, 237, 231, 0.8); }
 
 /* The leaf a finished thing earns. Accent green, because that is what the
@@ -635,7 +683,7 @@ section { position: relative; }
   100% { opacity: 0; transform: translate(0, -20px) scale(0.9) rotate(14deg); }
 }
 .leaf-pop {
-  position: absolute;
+  position: fixed;
   pointer-events: none;
   color: var(--accent);
   animation: sprout 900ms var(--ease) forwards;
@@ -667,7 +715,7 @@ section { position: relative; }
 .chip .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: 0.5; }
 /* Before the section is reached the five sit thrown apart, the way the week
    actually feels. Arriving pulls them into a line. */
-.scatter:not(.in) .chip { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 0.35; }
+.js .scatter:not(.in) .chip { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 0.35; }
 
 .converge {
   display: flex;
@@ -767,6 +815,7 @@ section { position: relative; }
 }
 
 .klass {
+  align-self: flex-start;
   font-size: 10.5px;
   color: var(--ink-3);
   padding: 2px 5px;
@@ -786,11 +835,9 @@ section { position: relative; }
   background: var(--surface-2);
   color: var(--ink);
   /* Each one draws itself in, left to right, when the grid is reached. */
-  opacity: 0;
-  transform: translateX(-6px);
   transition: opacity 420ms var(--ease), transform 480ms var(--spring);
 }
-.weekwrap.in .item { opacity: 1; transform: none; }
+.js .weekwrap:not(.in) .item { opacity: 0; transform: translateX(-6px); }
 .item.due { border-left-color: var(--danger); }
 .item.exam { border-left-color: var(--amber); }
 .item.proj { border-left-color: var(--violet); }
@@ -820,7 +867,7 @@ section { position: relative; }
   margin-bottom: 14px;
 }
 .obj .kind i { width: 3px; height: 15px; border-radius: 2px; display: block; }
-.obj .rule { height: 1px; background: var(--line-soft); margin: 20px 0 16px; }
+.obj .rule { height: 1px; background: var(--line-soft); margin: 24px 0 16px; margin-top: auto; }
 .obj .know { font-size: 14px; color: var(--ink-3); }
 .obj .know b { color: var(--ink-2); font-weight: 500; }
 
@@ -890,11 +937,11 @@ section { position: relative; }
   inset: 0 auto 0 0;
   border-radius: 3px;
   background: var(--accent);
-  width: 0;
+  width: var(--w);
   transition: width 900ms var(--ease);
 }
+.js .gradecard:not(.in) .bar-fill { width: 0; }
 .bar-fill.low { background: var(--danger); }
-.in .bar-fill { width: var(--w); }
 /* The class average for that same evaluation, which is the one comparison
    COBA actually hands over. */
 .bar-avg {
@@ -904,10 +951,9 @@ section { position: relative; }
   width: 1.5px;
   background: var(--ink-3);
   left: var(--a);
-  opacity: 0;
   transition: opacity 400ms var(--ease) 700ms;
 }
-.in .bar-avg { opacity: 1; }
+.js .gradecard:not(.in) .bar-avg { opacity: 0; }
 .bar-row .val { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink-2); }
 
 .freshness {
@@ -945,7 +991,7 @@ section { position: relative; }
   place-items: center;
 }
 .conn .name { font-size: 16.5px; }
-.conn .why { font-size: 14px; color: var(--ink-2); margin-top: 2px; }
+.conn .why { font-size: 14px; color: var(--ink-2); margin-top: 2px; max-width: 68ch; }
 @media (max-width: 640px) {
   .conn { grid-template-columns: 34px 1fr; }
   .conn > :last-child { grid-column: 2; justify-self: start; }
@@ -964,11 +1010,9 @@ section { position: relative; }
   border: 1px solid var(--line);
   background: var(--surface);
   box-shadow: var(--shadow-card);
-  opacity: 0;
-  transform: translateY(10px) scale(0.985);
   transition: opacity 500ms var(--ease), transform 620ms var(--spring);
 }
-.notes.in .note { opacity: 1; transform: none; }
+.js .notes:not(.in) .note { opacity: 0; transform: translateY(10px) scale(0.985); }
 .note .ico { width: 30px; height: 30px; border-radius: var(--radius-sm); display: grid; place-items: center; background: var(--surface-2); color: var(--ink-2); }
 .note .hd { display: flex; align-items: baseline; gap: 10px; font-size: 14px; }
 .note .hd b { font-weight: 500; }
@@ -997,11 +1041,10 @@ section { position: relative; }
   height: 3px;
   border-radius: 2px;
   background: var(--danger);
-  transform: scaleX(0);
   transform-origin: left;
   transition: transform 620ms var(--ease) 200ms;
 }
-.statement.in .struck::after { transform: scaleX(1); }
+.js .statement:not(.in) .struck::after { transform: scaleX(0); }
 
 /* ===========================================================================
    TREE
@@ -1011,7 +1054,8 @@ section { position: relative; }
 .tree-art {
   display: grid;
   place-items: center;
-  padding: 34px;
+  padding: 44px 34px;
+  min-height: 340px;
   border-radius: var(--radius-panel);
   border: 1px solid var(--line);
   background:
@@ -1019,8 +1063,9 @@ section { position: relative; }
     var(--surface);
 }
 .tree-art path.branch { stroke: var(--ink-3); fill: none; stroke-width: 2.2; stroke-linecap: round; }
-.tree-art .lf { fill: var(--accent); opacity: 0; transform-box: fill-box; transform-origin: center; transform: scale(0.2); }
-.tree-art.in .lf { animation: leaf-in 620ms var(--spring) forwards; }
+.tree-art .lf { color: var(--accent); fill: var(--accent); transform-box: fill-box; transform-origin: center; }
+.js .tree-art:not(.in) .lf { opacity: 0; transform: scale(0.2); }
+.js .tree-art.in .lf { animation: leaf-in 620ms var(--spring) forwards; }
 @keyframes leaf-in { to { opacity: 1; transform: scale(1); } }
 
 /* ===========================================================================
@@ -1067,7 +1112,7 @@ section { position: relative; }
 /* ===========================================================================
    REVEAL
    ======================================================================== */
-.rise {
+.js .rise {
   opacity: 0;
   transform: translateY(18px);
   transition: opacity 620ms var(--ease), transform 780ms var(--spring);
@@ -1081,7 +1126,144 @@ section { position: relative; }
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  .rise, .note, .item, .chip { opacity: 1 !important; transform: none !important; }
+  .rise, .note, .item, .chip, .lf { opacity: 1 !important; transform: none !important; }
   .bar-fill { width: var(--w) !important; }
-  .bar-avg, .tree-art .lf { opacity: 1 !important; transform: none !important; }
+  .struck::after { transform: scaleX(1) !important; }
+}
+
+/* ===========================================================================
+   THE CAPTURE. A spread, and what comes off it.
+   ======================================================================== */
+.capture {
+  margin-top: 50px;
+  display: grid;
+  grid-template-columns: 1.15fr 60px 1fr;
+  align-items: center;
+  gap: 8px;
+}
+@media (max-width: 900px) {
+  .capture { grid-template-columns: 1fr; gap: 22px; }
+  .capture .arrowcol { transform: rotate(90deg); justify-self: center; }
+}
+.arrowcol { display: grid; place-items: center; }
+
+/* Paper, in a page that is charcoal. This is the one thing on the site
+   allowed to be the colour of the real object rather than a theme token,
+   because the object is a paper agenda and that is the whole point. */
+.spread {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  background: #efeadf;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lift);
+  overflow: hidden;
+  transform: rotate(-0.7deg);
+}
+.spread .page { position: relative; padding: 22px 20px; min-height: 190px; }
+.spread .page + .page { border-left: 1px solid rgba(33, 30, 25, 0.1); }
+.spread .ruled { display: block; height: 24px; border-bottom: 1px solid rgba(33, 30, 25, 0.09); }
+.spread .ink { position: absolute; inset: 22px 20px; }
+.spread .ink svg { width: 100%; height: 100%; }
+.spread .ink path { fill: none; stroke: #2f3a52; stroke-width: 1.15; stroke-linecap: round; stroke-linejoin: round; opacity: 0.66; }
+/* The gutter shadow, which is what makes two rectangles read as one book. */
+.spread .fold {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 26px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, transparent, rgba(33, 30, 25, 0.11), transparent);
+  pointer-events: none;
+}
+
+.drafts {
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+.draft {
+  display: grid;
+  grid-template-columns: 30px 1fr 24px;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 4px;
+}
+.draft + .draft { border-top: 1px solid var(--line-soft); }
+.draft .p {
+  font-size: 10.5px;
+  text-align: center;
+  padding: 3px 0;
+  border-radius: var(--radius-xs);
+  background: var(--surface-2);
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+.draft b { display: block; font-weight: 500; font-size: 14.5px; }
+.draft em { display: block; font-style: normal; margin-top: 1px; }
+.draft .ok {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-xs);
+  border: 1px solid color-mix(in srgb, var(--accent) 34%, transparent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* ===========================================================================
+   NARROW
+
+   The week grid is five days wide and does not have a small version: squeezed
+   into a phone it stops being a week. So below the width where it stops
+   working it scrolls sideways inside its own frame, and everything else in
+   the page reflows normally.
+
+   Grid and flex children default to min-width: auto, which means they refuse
+   to shrink past their own content. One long course name in one cell was
+   therefore setting the width of the entire document, and body's overflow-x
+   was hiding the evidence rather than fixing it.
+   ======================================================================== */
+.week > *,
+.grid > *,
+.conn > *,
+.note > *,
+.capture > *,
+.treewrap > * { min-width: 0; }
+
+.weekwrap { overflow-x: auto; overscroll-behavior-x: contain; }
+.week { min-width: 660px; }
+
+.item { overflow-wrap: anywhere; }
+
+@media (max-width: 640px) {
+  .wrap { padding-inline: 20px; }
+  .band { padding-block: 68px; }
+  .hero { padding-top: 40px; }
+
+  /* The frame is a picture of a laptop, and a picture of a laptop on a phone
+     is a stamp. The panel is the thing worth looking at, so the frame gets
+     out of its way. */
+  .mac { transform: none; }
+  .screen { height: 348px; }
+  .notch-shell { --notch-h: 206px; }
+  .notch-shell.is-open .notch-panel { width: min(300px, 82vw); }
+
+  .legend { gap: 12px; font-size: 12.5px; }
+  .legend .dimmer { margin-left: 0; }
+  .states { gap: 8px; }
+  .state { font-size: 13px; padding: 8px 12px; }
+  .numeral { font-size: 44px; }
+  .gradecard .top, .bars, .freshness { padding-inline: 20px; }
+  .conn { padding: 16px 2px; gap: 14px; }
+  .card { padding: 22px; }
+  .foot-in { gap: 14px; }
+  .foot-links { margin-left: 0; flex-wrap: wrap; gap: 16px; }
+  .hero-cta .btn, .close .btn { flex: 1 1 auto; }
 }
