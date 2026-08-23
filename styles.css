@@ -1,0 +1,1087 @@
+/* ===========================================================================
+   feuillet.site
+
+   The marketing page for Feuillet. Nocturne first: the app's dark theme is
+   the default here, because a page that opens warm-charcoal and then shows a
+   panel glowing out of a MacBook notch is the honest advertisement for what
+   this thing actually is. Parchment is still one click (or one system
+   setting) away, and every token below is lifted unchanged from the app's
+   src/index.css so the site and the product cannot drift apart.
+
+   Rules carried over from the app and not to be broken here:
+     - One face. Feuillet Sans sets everything. Hierarchy is scale, colour
+       and spacing, never a change of voice.
+     - The leaf tittle is ss01, display type only. Never in running text.
+     - Colour is meaning-bearing. accent = done/growing, amber = wants
+       attention, danger = slipping. Nothing decorative.
+     - No em dashes in copy.
+   ======================================================================== */
+
+@font-face {
+  font-family: 'Feuillet Sans';
+  src: url('assets/feuillet-sans.woff2') format('woff2');
+  font-weight: 400 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* --- NOCTURNE, the default here ---------------------------------------- */
+:root {
+  --canvas: #161513;
+  --surface: #1d1b18;
+  --surface-2: #2a2723;
+  --line: #302d28;
+  --line-soft: #232120;
+  --ink: #f0ede7;
+  --ink-2: #9d9a94;
+  --ink-3: #6d6a64;
+  --accent: #8fae86;
+  --accent-soft: #212a20;
+  --amber: #c9a15f;
+  --amber-soft: #2a2318;
+  --amber-ink: #d9b778;
+  --danger: #cc7367;
+  --danger-soft: #2b1d1a;
+  --info: #7b9bb5;
+  --violet: #9c8cbb;
+  --hold-soft: #24221f;
+  --hold-ink: #8b8781;
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.32);
+
+  /* The page's own two: a lift for floating panels, and the glow the notch
+     panel throws. The glow is the panel's light, not decoration. */
+  --shadow-lift: 0 24px 60px -20px rgba(0, 0, 0, 0.7), 0 2px 8px rgba(0, 0, 0, 0.3);
+  --glow: rgba(143, 174, 134, 0.16);
+
+  --radius-xs: 3px;
+  --radius-sm: 5px;
+  --radius-md: 7px;
+  --radius-lg: 10px;
+  --radius-panel: 16px;
+
+  --font: 'Feuillet Sans', system-ui, -apple-system, sans-serif;
+
+  /* The notch panel's own spring, damped at zeta 0.85. Dennis asked for
+     "less bouncy rebound" and this is that curve: 0.6% overshoot, where the
+     old one threw 4.6%. Sampled straight from the equation. */
+  --spring: linear(0, 0.0626, 0.2, 0.3602, 0.514, 0.6471, 0.7548, 0.8373, 0.8978,
+    0.9401, 0.9684, 0.9865, 0.9972, 1.003, 1.0056, 1.0063, 1.0059, 1.0051,
+    1.0041, 1.0031, 1.0023, 1.0016, 1.0011, 1.0007, 1);
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --measure: 1160px;
+}
+
+/* --- PARCHMENT ---------------------------------------------------------
+   Three selectors, not two, for the same reason the app needs three: the
+   theme has a light state, a dark state and a follow the system state. A
+   palette defined only in a media query cannot be switched on by hand; one
+   defined only under an attribute never follows the machine.
+   --------------------------------------------------------------------- */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) {
+    --canvas: #f8f5ef;
+    --surface: #f1ece3;
+    --surface-2: #e7e0d4;
+    --line: #ded7c9;
+    --line-soft: #eae4d9;
+    --ink: #211e19;
+    --ink-2: #6b645a;
+    --ink-3: #9d968a;
+    --accent: #4f7048;
+    --accent-soft: #e3e9dc;
+    --amber: #a97220;
+    --amber-soft: #f1e7d6;
+    --amber-ink: #7a5214;
+    --danger: #9d4032;
+    --danger-soft: #eddcd6;
+    --info: #3d6079;
+    --violet: #6f5788;
+    --hold-soft: #e8e3d9;
+    --hold-ink: #6e6656;
+    --shadow-card: 0 1px 2px rgba(33, 30, 25, 0.05);
+    --shadow-lift: 0 24px 50px -22px rgba(33, 30, 25, 0.22), 0 2px 6px rgba(33, 30, 25, 0.06);
+    --glow: rgba(79, 112, 72, 0.1);
+  }
+}
+
+:root[data-theme='light'] {
+  --canvas: #f8f5ef;
+  --surface: #f1ece3;
+  --surface-2: #e7e0d4;
+  --line: #ded7c9;
+  --line-soft: #eae4d9;
+  --ink: #211e19;
+  --ink-2: #6b645a;
+  --ink-3: #9d968a;
+  --accent: #4f7048;
+  --accent-soft: #e3e9dc;
+  --amber: #a97220;
+  --amber-soft: #f1e7d6;
+  --amber-ink: #7a5214;
+  --danger: #9d4032;
+  --danger-soft: #eddcd6;
+  --info: #3d6079;
+  --violet: #6f5788;
+  --hold-soft: #e8e3d9;
+  --hold-ink: #6e6656;
+  --shadow-card: 0 1px 2px rgba(33, 30, 25, 0.05);
+  --shadow-lift: 0 24px 50px -22px rgba(33, 30, 25, 0.22), 0 2px 6px rgba(33, 30, 25, 0.06);
+  --glow: rgba(79, 112, 72, 0.1);
+}
+
+/* --- base --------------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 17px;
+  line-height: 1.6;
+  /* Geometric faces close up badly under negative tracking: the round
+     counters are the first thing to go. Feuillet Sans is set at its own
+     width, here as in the app. */
+  letter-spacing: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  transition: background 400ms var(--ease), color 400ms var(--ease);
+}
+
+img, svg { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: var(--radius-xs); }
+
+/* Paper grain. In Nocturne it stops the flat charcoal reading as a void; in
+   Parchment it is the stock. Two percent, so you only notice it missing. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0.028;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* --- type primitives ----------------------------------------------------- */
+
+/* The leaf lives in ss01 and nowhere else. Display type only, one or two to
+   a screen, which is the whole point of moving it off the default i. */
+.display { font-feature-settings: 'ss01' 1; }
+
+h1, h2, h3 { font-weight: 500; line-height: 1.08; letter-spacing: 0; }
+
+.h-hero {
+  font-size: clamp(46px, 8.4vw, 112px);
+  line-height: 0.97;
+  font-weight: 500;
+}
+
+.h-section {
+  font-size: clamp(32px, 4.6vw, 56px);
+  line-height: 1.04;
+  font-weight: 500;
+}
+
+.h-card { font-size: 21px; line-height: 1.25; font-weight: 500; }
+
+.eyebrow {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.eyebrow::before {
+  content: '';
+  width: 18px;
+  height: 1px;
+  background: var(--accent);
+  opacity: 0.55;
+}
+
+.meta {
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.lede {
+  font-size: clamp(17px, 1.55vw, 20px);
+  line-height: 1.62;
+  color: var(--ink-2);
+  max-width: 34em;
+}
+
+.dim { color: var(--ink-2); }
+.dimmer { color: var(--ink-3); }
+.accent { color: var(--accent); }
+
+/* French content. A semantic hook, visually neutral: course names are read,
+   not admired. Carried over from the app so the two agree. */
+.fr { font-style: normal; }
+
+.soon {
+  display: inline-block;
+  vertical-align: 0.22em;
+  margin-left: 10px;
+  padding: 3px 8px 2px;
+  font-size: 10.5px;
+  line-height: 1.25;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--amber-ink);
+  background: var(--amber-soft);
+  border: 1px solid color-mix(in srgb, var(--amber) 26%, transparent);
+  border-radius: var(--radius-xs);
+  white-space: nowrap;
+}
+.soon.is-live {
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.soon.is-blocked {
+  color: var(--hold-ink);
+  background: var(--hold-soft);
+  border-color: var(--line);
+}
+
+/* --- layout -------------------------------------------------------------- */
+.wrap {
+  width: 100%;
+  max-width: var(--measure);
+  margin-inline: auto;
+  padding-inline: 28px;
+}
+
+section { position: relative; }
+
+.band {
+  padding-block: clamp(84px, 11vw, 152px);
+  border-top: 1px solid var(--line-soft);
+}
+.band.tight { padding-block: clamp(64px, 8vw, 104px); }
+.band.no-rule { border-top: 0; }
+
+.head { max-width: 30ch; }
+.head .lede { margin-top: 22px; }
+.head .eyebrow { margin-bottom: 20px; }
+.head-wide { max-width: 46ch; }
+
+/* --- nav ----------------------------------------------------------------- */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  background: color-mix(in srgb, var(--canvas) 78%, transparent);
+  border-bottom: 1px solid transparent;
+  transition: border-color 300ms var(--ease), background 300ms var(--ease);
+}
+.nav.is-stuck { border-bottom-color: var(--line-soft); }
+
+.nav-in {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  height: 62px;
+}
+.nav-links {
+  display: flex;
+  gap: 26px;
+  margin-left: auto;
+  font-size: 14.5px;
+  color: var(--ink-2);
+}
+.nav-links a { transition: color 180ms var(--ease); }
+.nav-links a:hover { color: var(--ink); }
+.nav-right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+.nav-links + .nav-right { margin-left: 0; }
+
+@media (max-width: 860px) {
+  .nav-links { display: none; }
+}
+
+.logo { color: var(--ink); }
+
+/* --- buttons ------------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  height: 42px;
+  padding-inline: 18px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink);
+  background: var(--surface);
+  transition: transform 220ms var(--spring), background 200ms var(--ease),
+    border-color 200ms var(--ease), color 200ms var(--ease);
+  white-space: nowrap;
+}
+.btn:hover { transform: translateY(-1px); background: var(--surface-2); }
+.btn:active { transform: translateY(0); }
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--canvas);
+}
+.btn-primary:hover {
+  background: color-mix(in srgb, var(--accent) 88%, var(--ink));
+  border-color: color-mix(in srgb, var(--accent) 88%, var(--ink));
+}
+
+.btn-ghost { background: transparent; border-color: transparent; color: var(--ink-2); }
+.btn-ghost:hover { background: var(--surface); color: var(--ink); }
+
+.btn-lg { height: 50px; padding-inline: 24px; font-size: 16px; }
+
+.btn-icon {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: var(--radius-md);
+  border-color: transparent;
+  background: transparent;
+  color: var(--ink-2);
+}
+.btn-icon:hover { background: var(--surface); color: var(--ink); }
+
+/* --- panels -------------------------------------------------------------- */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 26px;
+  box-shadow: var(--shadow-card);
+  transition: transform 400ms var(--spring), border-color 300ms var(--ease);
+}
+.card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--line) 60%, var(--ink-3)); }
+.card p { color: var(--ink-2); font-size: 15.5px; margin-top: 10px; }
+
+.grid { display: grid; gap: 18px; }
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-2 { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 900px) { .grid-3 { grid-template-columns: 1fr; } .grid-2 { grid-template-columns: 1fr; } }
+
+/* ===========================================================================
+   HERO
+   ======================================================================== */
+.hero {
+  padding-top: clamp(64px, 9vw, 116px);
+  padding-bottom: clamp(40px, 5vw, 64px);
+  position: relative;
+  overflow: hidden;
+}
+
+/* The bloom behind the machine. This is the panel's own light spilling onto
+   the page, which is why it is the accent and nothing else. */
+.hero::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: min(1100px, 120vw);
+  aspect-ratio: 1;
+  transform: translate(-50%, -22%);
+  background: radial-gradient(circle, var(--glow) 0%, transparent 62%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.hero-copy { max-width: 20ch; }
+.hero h1 { margin-top: 24px; }
+.hero .lede { margin-top: 26px; max-width: 40ch; }
+
+.hero-cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 34px;
+}
+.hero-note { margin-top: 16px; font-size: 13.5px; color: var(--ink-3); }
+
+/* --- the machine -------------------------------------------------------- */
+.stage {
+  margin-top: clamp(56px, 7vw, 92px);
+  perspective: 1600px;
+}
+
+.mac {
+  position: relative;
+  max-width: 940px;
+  margin-inline: auto;
+  border-radius: 18px 18px 4px 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-bottom-width: 0;
+  padding: 0;
+  box-shadow: var(--shadow-lift);
+  transform: rotateX(4deg);
+  transform-origin: 50% 100%;
+}
+
+/* The menu bar, with a real hole in it. The notch is a hole about 32pt deep
+   with no pixels behind it, so nothing the panel draws can cross it. */
+.menubar {
+  position: relative;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding-inline: 16px;
+  font-size: 12.5px;
+  color: var(--ink-2);
+  background: color-mix(in srgb, var(--canvas) 60%, var(--surface-2));
+  border-radius: 17px 17px 0 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+.menubar .mb-right { margin-left: auto; display: flex; gap: 14px; align-items: center; }
+.menubar .mb-app { color: var(--ink); font-weight: 500; }
+@media (max-width: 700px) { .menubar .mb-hide { display: none; } }
+
+.cutout {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  width: 168px;
+  height: 30px;
+  background: #000;
+  border-radius: 0 0 11px 11px;
+  z-index: 3;
+}
+
+.screen {
+  height: clamp(230px, 30vw, 330px);
+  background:
+    radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--accent) 7%, transparent) 0%, transparent 60%),
+    var(--canvas);
+  border-radius: 0 0 3px 3px;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+.screen-hint {
+  font-size: 13px;
+  color: var(--ink-3);
+  text-align: center;
+  padding: 0 20px;
+}
+
+.mac-foot {
+  max-width: 1080px;
+  height: 12px;
+  margin: 0 auto;
+  border-radius: 0 0 12px 12px;
+  background: linear-gradient(var(--surface-2), var(--surface));
+  border: 1px solid var(--line);
+  border-top: 0;
+  box-shadow: 0 18px 34px -18px rgba(0, 0, 0, 0.55);
+}
+
+/* --- the notch panel ----------------------------------------------------
+   The real thing's behaviour, reproduced: one column and no navigation,
+   width opens first with height 100ms behind, inverted corners where it
+   meets the top edge, and a genie on the way out.
+   ---------------------------------------------------------------------- */
+.notch {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  z-index: 4;
+  transform: translateX(-50%);
+  width: 168px;
+  overflow: hidden;
+  background: #0b0a09;
+  color: #f0ede7;
+  border-radius: 0 0 13px 13px;
+  box-shadow: 0 18px 40px -12px rgba(0, 0, 0, 0.8);
+  /* Width first, height 100ms behind. At 200ms they read as two events; at
+     100ms as one motion with a hinge. */
+  transition:
+    width 420ms var(--spring),
+    height 420ms var(--spring) 100ms,
+    opacity 200ms var(--ease),
+    filter 260ms var(--ease);
+  height: 30px;
+}
+.notch.is-open { width: 340px; height: var(--notch-h, 232px); }
+
+/* The genie. It warps the panel's own pixels rather than cropping its
+   outline, which is the only version that reads as a genie at all. */
+.notch.is-closing {
+  transition: width 260ms cubic-bezier(0.6, 0, 0.9, 0.4),
+    height 260ms cubic-bezier(0.6, 0, 0.9, 0.4),
+    opacity 260ms ease-in,
+    filter 260ms ease-in;
+  filter: blur(6px);
+  opacity: 0;
+}
+
+/* Inverted corners, 13px, where the panel meets the top edge. Slightly
+   rounder and less aggressive than the 18px first pass. */
+.notch-ear {
+  position: absolute;
+  top: 0;
+  width: 13px;
+  height: 13px;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 200ms var(--ease) 220ms;
+  background: radial-gradient(circle at var(--cx) 100%, transparent 0 13px, #0b0a09 13.5px);
+}
+.notch.is-open .notch-ear { opacity: 1; }
+.notch-ear.l { left: -13px; --cx: 0%; }
+.notch-ear.r { right: -13px; --cx: 100%; }
+
+.notch-body {
+  padding: 8px 12px 10px;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 220ms var(--ease) 180ms, transform 300ms var(--spring) 180ms;
+}
+.notch.is-open .notch-body { opacity: 1; transform: none; }
+
+/* The strip below the cutout: 30px of dead space the hardware owns. */
+.notch-strip { height: 24px; }
+
+.notch-sec + .notch-sec { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.07); }
+.notch-lab {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  font-size: 10.5px;
+  color: rgba(240, 237, 231, 0.5);
+  margin-bottom: 6px;
+}
+.notch-lab .stamp { margin-left: auto; font-variant-numeric: tabular-nums; }
+
+.nrow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 5px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 160ms var(--ease);
+}
+.nrow:hover { background: rgba(255, 255, 255, 0.05); }
+.nrow .when { margin-left: auto; font-size: 11px; font-variant-numeric: tabular-nums; color: rgba(240, 237, 231, 0.45); }
+.nrow .txt { transition: color 200ms var(--ease); }
+.nrow.done .txt { text-decoration: line-through; color: rgba(240, 237, 231, 0.38); }
+.nrow.done .when { opacity: 0.4; }
+
+.box {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid rgba(240, 237, 231, 0.34);
+  border-radius: var(--radius-xs);
+  display: grid;
+  place-items: center;
+  transition: background 200ms var(--ease), border-color 200ms var(--ease);
+}
+.nrow.done .box { background: var(--accent); border-color: var(--accent); }
+.box svg { width: 9px; height: 9px; opacity: 0; transform: scale(0.6); transition: opacity 160ms var(--ease), transform 300ms var(--spring); }
+.nrow.done .box svg { opacity: 1; transform: none; }
+
+.notch-cog {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  color: rgba(240, 237, 231, 0.35);
+  opacity: 0;
+  transition: opacity 200ms var(--ease) 260ms, color 160ms var(--ease);
+}
+.notch.is-open .notch-cog { opacity: 1; }
+.notch-cog:hover { color: rgba(240, 237, 231, 0.8); }
+
+/* The leaf a finished thing earns. Accent green, because that is what the
+   colour means. */
+@keyframes sprout {
+  0% { opacity: 0; transform: translate(0, 2px) scale(0.4) rotate(-24deg); }
+  55% { opacity: 1; transform: translate(0, -9px) scale(1.08) rotate(6deg); }
+  100% { opacity: 0; transform: translate(0, -20px) scale(0.9) rotate(14deg); }
+}
+.leaf-pop {
+  position: absolute;
+  pointer-events: none;
+  color: var(--accent);
+  animation: sprout 900ms var(--ease) forwards;
+  z-index: 20;
+}
+
+/* ===========================================================================
+   THE SCATTER. Five places, one place.
+   ======================================================================== */
+.scatter {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 46px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 14.5px;
+  color: var(--ink-2);
+  transition: transform 700ms var(--spring), opacity 500ms var(--ease), color 400ms var(--ease);
+}
+.chip .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: 0.5; }
+/* Before the section is reached the five sit thrown apart, the way the week
+   actually feels. Arriving pulls them into a line. */
+.scatter:not(.in) .chip { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 0.35; }
+
+.converge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 38px;
+  color: var(--ink-3);
+  font-size: 14px;
+}
+.converge .arrow { transition: transform 600ms var(--spring); }
+.scatter-block.in .converge .arrow { transform: translateY(4px); }
+
+.one-place {
+  margin-top: 22px;
+  display: flex;
+  justify-content: center;
+}
+.one-place .pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 26px 14px 20px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--accent) 34%, transparent);
+  background: var(--accent-soft);
+  color: var(--ink);
+  font-size: 16px;
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 7%, transparent);
+}
+
+/* ===========================================================================
+   THE WEEK. The calendar is not a type, it is the view that regroups
+   everything: assignments, exams, personal projects, school projects.
+   ======================================================================== */
+.weekwrap {
+  margin-top: 52px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+  box-shadow: var(--shadow-lift);
+  overflow: hidden;
+}
+.weekbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line-soft);
+  font-size: 13.5px;
+  color: var(--ink-2);
+  background: color-mix(in srgb, var(--surface-2) 45%, var(--surface));
+}
+.weekbar .seg { display: flex; gap: 2px; margin-left: auto; padding: 3px; background: var(--surface-2); border-radius: var(--radius-md); }
+.weekbar .seg span { padding: 4px 12px; border-radius: var(--radius-sm); font-size: 12.5px; }
+.weekbar .seg span.on { background: var(--surface); color: var(--ink); box-shadow: var(--shadow-card); }
+
+.week {
+  display: grid;
+  grid-template-columns: 52px repeat(5, 1fr);
+  font-size: 12.5px;
+}
+.week .hd {
+  padding: 11px 10px 10px;
+  border-bottom: 1px solid var(--line-soft);
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+.week .hd b { display: block; color: var(--ink); font-weight: 500; font-size: 13px; }
+.week .hd.today b { color: var(--accent); }
+.week .gut {
+  padding: 7px 8px;
+  border-right: 1px solid var(--line-soft);
+  border-bottom: 1px solid var(--line-soft);
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  text-align: right;
+}
+.week .cell {
+  min-height: 46px;
+  padding: 5px;
+  border-bottom: 1px solid var(--line-soft);
+  border-right: 1px solid var(--line-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.week .cell:nth-child(6n) { border-right: 0; }
+.week .band-lab {
+  grid-column: 1 / -1;
+  padding: 7px 10px;
+  font-size: 10.5px;
+  color: var(--ink-3);
+  background: color-mix(in srgb, var(--surface-2) 55%, transparent);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.klass {
+  font-size: 10.5px;
+  color: var(--ink-3);
+  padding: 2px 5px;
+  border-radius: var(--radius-xs);
+  background: color-mix(in srgb, var(--surface-2) 70%, transparent);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border-radius: var(--radius-xs);
+  font-size: 11.5px;
+  line-height: 1.25;
+  border-left: 2px solid var(--ink-3);
+  background: var(--surface-2);
+  color: var(--ink);
+  /* Each one draws itself in, left to right, when the grid is reached. */
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 420ms var(--ease), transform 480ms var(--spring);
+}
+.weekwrap.in .item { opacity: 1; transform: none; }
+.item.due { border-left-color: var(--danger); }
+.item.exam { border-left-color: var(--amber); }
+.item.proj { border-left-color: var(--violet); }
+.item.ev { border-left-color: var(--info); background: transparent; border: 1px solid var(--line); border-left: 2px solid var(--info); }
+.item .t { font-variant-numeric: tabular-nums; color: var(--ink-3); font-size: 10.5px; }
+
+@media (max-width: 760px) {
+  .week { grid-template-columns: 44px repeat(5, 1fr); font-size: 11px; }
+  .week .cell { min-height: 38px; }
+  .item { font-size: 10px; }
+}
+
+.legend { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 20px; font-size: 13px; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.legend i { width: 10px; height: 2px; border-radius: 2px; background: currentColor; display: block; }
+
+/* ===========================================================================
+   OBJECTS, STATES
+   ======================================================================== */
+.obj { display: flex; flex-direction: column; }
+.obj .kind {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--ink-3);
+  margin-bottom: 14px;
+}
+.obj .kind i { width: 3px; height: 15px; border-radius: 2px; display: block; }
+.obj .rule { height: 1px; background: var(--line-soft); margin: 20px 0 16px; }
+.obj .know { font-size: 14px; color: var(--ink-3); }
+.obj .know b { color: var(--ink-2); font-weight: 500; }
+
+.states { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 44px; }
+.state {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 15px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font-size: 14px;
+  color: var(--ink-2);
+}
+.state i { width: 8px; height: 8px; border-radius: 50%; display: block; }
+
+.stale {
+  margin-top: 26px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 18px 20px;
+  border-radius: var(--radius-lg);
+  background: var(--amber-soft);
+  border: 1px solid color-mix(in srgb, var(--amber) 24%, transparent);
+  max-width: 62ch;
+}
+.stale svg { flex: none; color: var(--amber); margin-top: 2px; }
+.stale p { font-size: 15px; color: var(--amber-ink); }
+
+/* ===========================================================================
+   GRADES
+   ======================================================================== */
+.gradecard { padding: 0; overflow: hidden; }
+.gradecard .top {
+  display: flex;
+  align-items: flex-end;
+  gap: 22px;
+  padding: 24px 26px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.numeral {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'ss01' 1;
+  font-size: 54px;
+  line-height: 1;
+  font-weight: 500;
+}
+.delta { font-size: 13.5px; display: inline-flex; align-items: center; gap: 5px; }
+.delta.up { color: var(--accent); }
+.delta.down { color: var(--danger); }
+
+.bars { padding: 20px 26px 26px; display: grid; gap: 16px; }
+.bar-row { display: grid; grid-template-columns: 1fr 54px; gap: 14px; align-items: center; font-size: 14px; }
+.bar-row .lab { display: flex; align-items: baseline; gap: 8px; }
+.bar-track {
+  grid-column: 1 / -1;
+  position: relative;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--surface-2);
+  overflow: visible;
+}
+.bar-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 3px;
+  background: var(--accent);
+  width: 0;
+  transition: width 900ms var(--ease);
+}
+.bar-fill.low { background: var(--danger); }
+.in .bar-fill { width: var(--w); }
+/* The class average for that same evaluation, which is the one comparison
+   COBA actually hands over. */
+.bar-avg {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 1.5px;
+  background: var(--ink-3);
+  left: var(--a);
+  opacity: 0;
+  transition: opacity 400ms var(--ease) 700ms;
+}
+.in .bar-avg { opacity: 1; }
+.bar-row .val { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink-2); }
+
+.freshness {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 26px;
+  border-top: 1px solid var(--line-soft);
+  background: color-mix(in srgb, var(--surface-2) 40%, transparent);
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+/* ===========================================================================
+   CONNECTORS
+   ======================================================================== */
+.conns { display: grid; gap: 0; margin-top: 44px; border-top: 1px solid var(--line-soft); }
+.conn {
+  display: grid;
+  grid-template-columns: 34px 1fr auto;
+  gap: 18px;
+  align-items: center;
+  padding: 20px 4px;
+  border-bottom: 1px solid var(--line-soft);
+  transition: background 200ms var(--ease);
+}
+.conn:hover { background: color-mix(in srgb, var(--surface) 60%, transparent); }
+.conn .mark {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  display: grid;
+  place-items: center;
+}
+.conn .name { font-size: 16.5px; }
+.conn .why { font-size: 14px; color: var(--ink-2); margin-top: 2px; }
+@media (max-width: 640px) {
+  .conn { grid-template-columns: 34px 1fr; }
+  .conn > :last-child { grid-column: 2; justify-self: start; }
+}
+
+/* ===========================================================================
+   REMINDERS
+   ======================================================================== */
+.notes { display: grid; gap: 14px; margin-top: 46px; }
+.note {
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  opacity: 0;
+  transform: translateY(10px) scale(0.985);
+  transition: opacity 500ms var(--ease), transform 620ms var(--spring);
+}
+.notes.in .note { opacity: 1; transform: none; }
+.note .ico { width: 30px; height: 30px; border-radius: var(--radius-sm); display: grid; place-items: center; background: var(--surface-2); color: var(--ink-2); }
+.note .hd { display: flex; align-items: baseline; gap: 10px; font-size: 14px; }
+.note .hd b { font-weight: 500; }
+.note .hd .at { margin-left: auto; font-size: 11.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.note .msg { font-size: 15px; color: var(--ink-2); margin-top: 3px; }
+
+/* ===========================================================================
+   THE STATEMENT. No chat box.
+   ======================================================================== */
+.statement { text-align: center; }
+.statement .big {
+  font-size: clamp(38px, 6.4vw, 84px);
+  line-height: 1.02;
+  font-weight: 500;
+  max-width: 16ch;
+  margin-inline: auto;
+}
+.statement .lede { margin: 30px auto 0; text-align: center; }
+.struck { position: relative; display: inline-block; color: var(--ink-3); }
+.struck::after {
+  content: '';
+  position: absolute;
+  left: -2%;
+  right: -2%;
+  top: 54%;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--danger);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 620ms var(--ease) 200ms;
+}
+.statement.in .struck::after { transform: scaleX(1); }
+
+/* ===========================================================================
+   TREE
+   ======================================================================== */
+.treewrap { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 56px; align-items: center; }
+@media (max-width: 900px) { .treewrap { grid-template-columns: 1fr; gap: 36px; } }
+.tree-art {
+  display: grid;
+  place-items: center;
+  padding: 34px;
+  border-radius: var(--radius-panel);
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(80% 70% at 50% 100%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 70%),
+    var(--surface);
+}
+.tree-art path.branch { stroke: var(--ink-3); fill: none; stroke-width: 2.2; stroke-linecap: round; }
+.tree-art .lf { fill: var(--accent); opacity: 0; transform-box: fill-box; transform-origin: center; transform: scale(0.2); }
+.tree-art.in .lf { animation: leaf-in 620ms var(--spring) forwards; }
+@keyframes leaf-in { to { opacity: 1; transform: scale(1); } }
+
+/* ===========================================================================
+   PLATFORMS + CLOSE
+   ======================================================================== */
+.plats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 46px; }
+@media (max-width: 820px) { .plats { grid-template-columns: 1fr; } }
+.plat { padding: 24px; border-radius: var(--radius-lg); border: 1px solid var(--line); background: var(--surface); }
+.plat .ico { color: var(--ink-3); margin-bottom: 16px; }
+.plat h3 { font-size: 18px; margin-bottom: 8px; }
+.plat p { font-size: 14.5px; color: var(--ink-2); }
+
+.close {
+  text-align: center;
+  padding-block: clamp(96px, 13vw, 176px);
+  position: relative;
+  overflow: hidden;
+}
+.close::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -40%;
+  width: min(900px, 120vw);
+  aspect-ratio: 1;
+  transform: translateX(-50%);
+  background: radial-gradient(circle, var(--glow) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: -1;
+}
+.close .h-section { max-width: 18ch; margin-inline: auto; }
+.close .hero-cta { justify-content: center; }
+
+.foot {
+  border-top: 1px solid var(--line-soft);
+  padding-block: 40px 56px;
+  font-size: 13.5px;
+  color: var(--ink-3);
+}
+.foot-in { display: flex; flex-wrap: wrap; gap: 22px; align-items: center; }
+.foot-links { display: flex; gap: 22px; margin-left: auto; }
+.foot-links a:hover { color: var(--ink); }
+
+/* ===========================================================================
+   REVEAL
+   ======================================================================== */
+.rise {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 620ms var(--ease), transform 780ms var(--spring);
+}
+.rise.in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .rise, .note, .item, .chip { opacity: 1 !important; transform: none !important; }
+  .bar-fill { width: var(--w) !important; }
+  .bar-avg, .tree-art .lf { opacity: 1 !important; transform: none !important; }
+}

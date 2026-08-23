@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- The Feuillet mark: the leaf that dots the i in the wordmark, nothing
+       invented. Cream ground so it holds up against a dark browser tab as well
+       as a light one — a transparent favicon with a dark vein disappears on
+       half the machines that show it. -->
+  <rect width="512" height="512" rx="112" fill="#F8F5EF"/>
+  <g transform="translate(256,256) scale(1.60717,-1.60717) translate(-120.1,-697.5)">
+    <path d="M88 586Q216 654 144 809Q34 732 88 586Z" fill="#4F7048"/>
+    <path d="M92 603Q129 694 139 792Q102 701 92 603Z" fill="#211E19"/>
+  </g>
+</svg>
