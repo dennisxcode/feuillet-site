@@ -34,7 +34,7 @@ const inlinedCss = css.replace(
   `url(data:font/woff2;base64,${font}) format('woff2')`
 )
 
-let html = read('index.html')
+let html = read('static.html')
   .replace('<link rel="stylesheet" href="styles.css" />', `<style>\n${inlinedCss}\n</style>`)
   .replace('<script src="site.js"></script>', `<script>\n${js}\n</script>`)
 
