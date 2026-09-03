@@ -16,6 +16,32 @@
   var canHover = window.matchMedia('(hover: hover)').matches
   var french = document.documentElement.lang === 'fr'
 
+  /* --- theme toggle (Nocturne / Parchment) -------------------------------- */
+  function updateThemeIcons(isLight) {
+    document.querySelectorAll('.nav-theme-btn').forEach(function (btn) {
+      btn.innerHTML = isLight
+        ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>'
+        : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>'
+      var title = isLight ? (french ? 'Passer au mode Nocturne' : 'Switch to Nocturne theme') : (french ? 'Passer au mode Parchemin' : 'Switch to Parchment theme')
+      btn.setAttribute('title', title)
+      btn.setAttribute('aria-label', title)
+    })
+  }
+
+  var currentTheme = 'dark'
+  try { currentTheme = localStorage.getItem('feuillet.theme') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') } catch {}
+  if (currentTheme === 'light') { root.dataset.theme = 'light' }
+  updateThemeIcons(root.dataset.theme === 'light')
+
+  document.querySelectorAll('.nav-theme-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var isLight = root.dataset.theme !== 'light'
+      root.dataset.theme = isLight ? 'light' : 'dark'
+      try { localStorage.setItem('feuillet.theme', root.dataset.theme) } catch {}
+      updateThemeIcons(isLight)
+    })
+  })
+
   /* --- first-party, cookie-free measurement ------------------------------
      Only an allow-listed event name, the page path and page language leave
      the browser. Global Privacy Control and Do Not Track are respected. */
@@ -182,11 +208,79 @@
     once(weekcard, function () { weekcard.classList.add('in') }, 0.25)
   }
 
+  /* --- ticks feed the sapling ---------------------------------------------- */
+  var sapling = document.getElementById('sapling')
+  var sapCount = document.getElementById('sapcount')
+  var leaves = 0
+  try { leaves = parseInt(sessionStorage.getItem('feuillet.site.leaves') || '0', 10) || 0 } catch {}
+
+  function paintSapling() {
+    if (!sapling) return
+    var slots = sapling.querySelectorAll('.slf')
+    slots.forEach(function (slot, i) { slot.classList.toggle('on', i < Math.min(leaves, slots.length)) })
+    if (sapCount) sapCount.textContent = String(leaves)
+    sapling.classList.toggle('has', leaves > 0)
+  }
+
+  function flyLeaf(from) {
+    leaves += 1
+    try { sessionStorage.setItem('feuillet.site.leaves', String(leaves)) } catch {}
+    paintSapling()
+    if (reduced || !from || !sapling) return
+    var target = sapling.getBoundingClientRect()
+    var fly = document.createElement('span')
+    fly.className = 'leaf-fly'
+    fly.innerHTML = '<svg width="11" height="16" viewBox="0 0 512 512"><use href="#leaf"/></svg>'
+    fly.style.left = (from.left + from.width / 2 - 5) + 'px'
+    fly.style.top = (from.top - 4) + 'px'
+    document.body.appendChild(fly)
+    var dx = target.left + target.width / 2 - (from.left + from.width / 2)
+    var dy = target.top + target.height * 0.5 - (from.top - 4)
+    fly.animate([
+      { transform: 'translate(0,0) rotate(0deg) scale(1)', opacity: 1 },
+      { transform: 'translate(' + dx * 0.5 + 'px,' + (dy * 0.5 - 44) + 'px) rotate(140deg) scale(0.95)', opacity: 1, offset: 0.55 },
+      { transform: 'translate(' + dx + 'px,' + dy + 'px) rotate(300deg) scale(0.45)', opacity: 0.15 }
+    ], { duration: 820, easing: 'cubic-bezier(0.3,0.7,0.3,1)' }).onfinish = function () { fly.remove() }
+  }
+
   /* --- ink becomes tasks ---------------------------------------------------
      Armed while it is still below the fold, so an arriving visitor sees the
      empty page and then the scan, never the finished page first. */
   var capture = document.getElementById('capture')
   if (capture) {
+    var scanzone = capture.querySelector('.scanzone')
+    var ocrBoxes = capture.querySelectorAll('.ocr-box')
+
+    function updateLaser(pct) {
+      if (scanzone) scanzone.style.setProperty('--beam-x', pct.toFixed(1) + '%')
+      ocrBoxes.forEach(function (box) {
+        var min = parseFloat(box.getAttribute('data-left') || '0')
+        var max = parseFloat(box.getAttribute('data-right') || '100')
+        box.classList.toggle('active', pct >= min && pct <= max)
+      })
+    }
+
+    if (scanzone && !reduced) {
+      var scrubLaser = function (e) {
+        var r = scanzone.getBoundingClientRect()
+        var p = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width))
+        updateLaser(p * 100)
+      }
+      scanzone.addEventListener('pointermove', scrubLaser)
+      scanzone.addEventListener('pointerdown', scrubLaser)
+    }
+
+    /* Interactive Draft Confirmations */
+    capture.querySelectorAll('.draft-confirm-btn').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation()
+        var draft = btn.closest('.draft')
+        if (!draft || draft.classList.contains('confirmed')) return
+        draft.classList.add('confirmed')
+        flyLeaf(btn.getBoundingClientRect())
+      })
+    })
+
     var arm = function () {
       capture.classList.remove('playing', 'done')
       capture.classList.add('armed')
@@ -204,6 +298,7 @@
           })
           setTimeout(function () {
             capture.classList.add('done')
+            updateLaser(38)
             capture.querySelectorAll('.draft').forEach(function (d, i) { d.style.transitionDelay = (i * 130) + 'ms' })
           }, 1450)
         })
@@ -427,97 +522,137 @@
       scrub.addEventListener('pointerup', releaseGrade)
       scrub.addEventListener('pointercancel', releaseGrade)
     }
+
+    /* Course Grade Micro-Steppers (+ / -) */
+    gradecard.querySelectorAll('.grade-btn').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation()
+        stopGradeAuto()
+        var courseIdx = parseInt(btn.getAttribute('data-course-index') || '0', 10)
+        var delta = parseFloat(btn.getAttribute('data-grade-adj') || '0')
+        var curEtape = ETAPES[at]
+        if (curEtape && curEtape.courses[courseIdx]) {
+          curEtape.courses[courseIdx].you = Math.max(0, Math.min(100, curEtape.courses[courseIdx].you + delta))
+          var sum = 0
+          curEtape.courses.forEach(function (c) { sum += c.you })
+          curEtape.avg = sum / curEtape.courses.length
+          paint(at, true)
+        }
+      })
+    })
   }
 
-  /* --- the notch ----------------------------------------------------------- */
+  /* --- the notch: multi-mode panel with tabs, focus timer, and mirror ------ */
   var notch = document.getElementById('notch')
   if (notch) {
+    var tabs = notch.querySelectorAll('.notch-tab')
+    var views = notch.querySelectorAll('.notch-view')
+    var heights = { upnext: '276px', grades: '210px', timer: '230px', mirror: '230px' }
+
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function (e) {
+        e.stopPropagation()
+        var mode = tab.getAttribute('data-mode') || 'upnext'
+        tabs.forEach(function (t) { t.classList.toggle('is-active', t === tab) })
+        views.forEach(function (v) { v.classList.toggle('is-active', v.getAttribute('data-view') === mode) })
+        notch.style.setProperty('--notch-h', heights[mode] || '276px')
+        if (!notch.classList.contains('is-open')) notch.classList.add('is-open')
+      })
+    })
+
+    /* Focus Study Countdown Timer */
+    var timerReadout = document.getElementById('timerReadout')
+    var timerToggle = document.getElementById('timerToggleBtn')
+    var timerReset = document.getElementById('timerResetBtn')
+    var timerSecs = 24 * 60
+    var timerRunning = false
+    var timerInterval = null
+
+    function renderTimer() {
+      if (!timerReadout) return
+      var m = Math.floor(timerSecs / 60)
+      var s = timerSecs % 60
+      timerReadout.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s
+    }
+
+    if (timerToggle) {
+      timerToggle.addEventListener('click', function (e) {
+        e.stopPropagation()
+        timerRunning = !timerRunning
+        timerToggle.textContent = timerRunning ? (french ? 'Pause' : 'Pause') : (french ? 'Reprendre' : 'Start')
+        timerToggle.classList.toggle('primary', !timerRunning)
+        if (timerRunning) {
+          timerInterval = setInterval(function () {
+            if (timerSecs > 0) {
+              timerSecs--
+              renderTimer()
+            } else {
+              clearInterval(timerInterval)
+              timerRunning = false
+              timerToggle.textContent = french ? 'Terminé !' : 'Done!'
+              flyLeaf(timerToggle.getBoundingClientRect())
+            }
+          }, 1000)
+        } else {
+          clearInterval(timerInterval)
+        }
+      })
+    }
+
+    if (timerReset) {
+      timerReset.addEventListener('click', function (e) {
+        e.stopPropagation()
+        clearInterval(timerInterval)
+        timerRunning = false
+        timerSecs = 24 * 60
+        renderTimer()
+        if (timerToggle) {
+          timerToggle.textContent = french ? 'Démarrer' : 'Start'
+          timerToggle.classList.add('primary')
+        }
+      })
+    }
+
     if (reduced) {
       notch.classList.add('is-open')
     } else {
       var held = false
       var beat = null
+      notch.addEventListener('pointerenter', function () { held = true })
+      notch.addEventListener('pointerleave', function () { held = false })
       whileSeen(document.getElementById('stage'), function (visible) {
         clearInterval(beat)
         if (!visible) return
         setTimeout(function () { notch.classList.add('is-open') }, 260)
         beat = setInterval(function () {
-          if (!held) notch.classList.toggle('is-open')
-        }, 5200)
+          if (!held && !timerRunning) notch.classList.toggle('is-open')
+        }, 5600)
       }, 0.3)
     }
   }
 
-  /* --- the workload week, then the collision ------------------------------- */
-  var workweek = document.getElementById('workweek')
-  if (workweek) {
-    once(workweek, function () {
-      var evs = workweek.querySelectorAll('.ev')
-      evs.forEach(function (ev, i) {
-        setTimeout(function () { ev.classList.add('in') }, reduced ? 0 : 220 + i * 180)
-      })
-      var load = workweek.querySelector('.load')
-      if (load) setTimeout(function () { load.classList.add('flag') }, reduced ? 0 : 220 + evs.length * 180 + 260)
-    }, 0.25)
-  }
-
   /* --- ticks feed the sapling ---------------------------------------------- */
-  var sapling = document.getElementById('sapling')
-  if (sapling) {
-    var sapCount = document.getElementById('sapcount')
-    var leaves = 0
-    try { leaves = parseInt(sessionStorage.getItem('feuillet.site.leaves') || '0', 10) || 0 } catch {}
-
-    function paintSapling() {
-      var slots = sapling.querySelectorAll('.slf')
-      slots.forEach(function (slot, i) { slot.classList.toggle('on', i < Math.min(leaves, slots.length)) })
-      sapCount.textContent = String(leaves)
-      sapling.classList.toggle('has', leaves > 0)
+  document.querySelectorAll('[data-tick]').forEach(function (row) {
+    var box = row.querySelector('[data-box]') || row.querySelector('.box')
+    if (!box) return
+    var tick = function (e) {
+      if (e) e.stopPropagation()
+      var done = row.classList.toggle('done')
+      box.setAttribute('aria-checked', done ? 'true' : 'false')
+      if (!done) return
+      flyLeaf(box.getBoundingClientRect())
     }
-
-    function flyLeaf(from) {
-      if (reduced || !from) return
-      var target = sapling.getBoundingClientRect()
-      var fly = document.createElement('span')
-      fly.className = 'leaf-fly'
-      fly.innerHTML = '<svg width="11" height="16" viewBox="0 0 512 512"><use href="#leaf"/></svg>'
-      fly.style.left = (from.left + from.width / 2 - 5) + 'px'
-      fly.style.top = (from.top - 4) + 'px'
-      document.body.appendChild(fly)
-      var dx = target.left + target.width / 2 - (from.left + from.width / 2)
-      var dy = target.top + target.height * 0.5 - (from.top - 4)
-      fly.animate([
-        { transform: 'translate(0,0) rotate(0deg) scale(1)', opacity: 1 },
-        { transform: 'translate(' + dx * 0.5 + 'px,' + (dy * 0.5 - 44) + 'px) rotate(140deg) scale(0.95)', opacity: 1, offset: 0.55 },
-        { transform: 'translate(' + dx + 'px,' + dy + 'px) rotate(300deg) scale(0.45)', opacity: 0.15 }
-      ], { duration: 820, easing: 'cubic-bezier(0.3,0.7,0.3,1)' }).onfinish = function () { fly.remove() }
-    }
-
-    document.querySelectorAll('[data-tick]').forEach(function (row) {
-      var box = row.querySelector('[data-box]')
-      if (!box) return
-      var tick = function (e) {
-        if (e) e.stopPropagation()
-        var done = row.classList.toggle('done')
-        box.setAttribute('aria-checked', done ? 'true' : 'false')
-        if (!done) return
-        leaves += 1
-        try { sessionStorage.setItem('feuillet.site.leaves', String(leaves)) } catch {}
-        paintSapling()
-        flyLeaf(box.getBoundingClientRect())
-      }
-      box.addEventListener('click', tick)
-      box.addEventListener('keydown', function (e) {
-        if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); tick() }
-      })
+    box.addEventListener('click', tick)
+    box.addEventListener('keydown', function (e) {
+      if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); tick() }
     })
-    paintSapling()
-  }
+  })
+  paintSapling()
 
-  /* --- tiles light where the cursor is ------------------------------------- */
+  /* --- tiles & cards light where the cursor is ---------------------------- */
   if (canHover && !reduced) {
     document.addEventListener('pointermove', function (e) {
-      var tile = e.target.closest ? e.target.closest('.tile') : null
+      var tile = e.target.closest ? e.target.closest('.tile, .appwin, .live-frame, .attention-card, .close-band, .notch-shell, .split-col') : null
       if (tile === null) return
       var r = tile.getBoundingClientRect()
       tile.style.setProperty('--mx', (e.clientX - r.left) + 'px')
