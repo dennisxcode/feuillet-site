@@ -441,9 +441,9 @@
         </div>
         <div class="drafts reveal">
           <p class="lab"><span>À vérifier</span><span class="muted">3 détectés</span></p>
-          <div class="draft"><span>Maths p.72, no 4 à 9</span><span class="when">demain · P3</span><button class="draft-confirm-btn" aria-label="Confirmer le brouillon" title="Confirmer"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg></button></div>
-          <div class="draft"><span>Examen, chapitres 3 et 4</span><span class="when">lundi · exam</span><button class="draft-confirm-btn" aria-label="Confirmer le brouillon" title="Confirmer"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg></button></div>
-          <div class="draft"><span>Projet histoire, remise le 14</span><span class="when">14 sept · P6</span><button class="draft-confirm-btn" aria-label="Confirmer le brouillon" title="Confirmer"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg></button></div>
+          <div class="draft" data-tick><span class="box" data-box role="checkbox" aria-label="Confirmer Maths p.72" aria-checked="false" tabindex="0"></span><span>Maths p.72, no 4 à 9</span><span class="when">demain · P3</span></div>
+          <div class="draft" data-tick><span class="box" data-box role="checkbox" aria-label="Confirmer Examen chimie" aria-checked="false" tabindex="0"></span><span>Examen, chapitres 3 et 4</span><span class="when">lundi · exam</span></div>
+          <div class="draft" data-tick><span class="box" data-box role="checkbox" aria-label="Confirmer Projet histoire" aria-checked="false" tabindex="0"></span><span>Projet histoire, remise le 14</span><span class="when">14 sept · P6</span></div>
           <p class="muted" style="margin-top:12px">Glissez sur la page pour balayer. Rien n'est enregistré sans confirmation.</p>
         </div>
       </div>
@@ -495,10 +495,10 @@
           </div>
         </div>
         <div class="bars gc-scrub" id="gcScrub">
-          <div class="bar low"><span class="val tnum">82</span><span class="col" style="height:82%"></span><span class="bar-avg" data-avg="84" style="bottom:84%"></span><span class="nm">Math</span><div class="grade-steppers"><button class="grade-btn" data-course-index="0" data-grade-adj="-2" aria-label="Math -2">-</button><button class="grade-btn" data-course-index="0" data-grade-adj="2" aria-label="Math +2">+</button></div></div>
-          <div class="bar low"><span class="val tnum">78</span><span class="col" style="height:78%"></span><span class="bar-avg" data-avg="81" style="bottom:81%"></span><span class="nm">Anglais</span><div class="grade-steppers"><button class="grade-btn" data-course-index="1" data-grade-adj="-2" aria-label="Anglais -2">-</button><button class="grade-btn" data-course-index="1" data-grade-adj="2" aria-label="Anglais +2">+</button></div></div>
-          <div class="bar low"><span class="val tnum">75</span><span class="col" style="height:75%"></span><span class="bar-avg" data-avg="79" style="bottom:79%"></span><span class="nm">Chimie</span><div class="grade-steppers"><button class="grade-btn" data-course-index="2" data-grade-adj="-2" aria-label="Chimie -2">-</button><button class="grade-btn" data-course-index="2" data-grade-adj="2" aria-label="Chimie +2">+</button></div></div>
-          <div class="bar low"><span class="val tnum">68</span><span class="col" style="height:68%"></span><span class="bar-avg" data-avg="80" style="bottom:80%"></span><span class="nm">Physique</span><div class="grade-steppers"><button class="grade-btn" data-course-index="3" data-grade-adj="-2" aria-label="Physique -2">-</button><button class="grade-btn" data-course-index="3" data-grade-adj="2" aria-label="Physique +2">+</button></div></div>
+          <div class="bar low"><span class="val tnum">82</span><span class="col" style="height:82%"></span><span class="bar-avg" data-avg="84" style="bottom:84%"></span><span class="nm">Math</span></div>
+          <div class="bar low"><span class="val tnum">78</span><span class="col" style="height:78%"></span><span class="bar-avg" data-avg="81" style="bottom:81%"></span><span class="nm">Anglais</span></div>
+          <div class="bar low"><span class="val tnum">75</span><span class="col" style="height:75%"></span><span class="bar-avg" data-avg="79" style="bottom:79%"></span><span class="nm">Chimie</span></div>
+          <div class="bar low"><span class="val tnum">68</span><span class="col" style="height:68%"></span><span class="bar-avg" data-avg="80" style="bottom:80%"></span><span class="nm">Physique</span></div>
         </div>
         <div class="gc-legend">
           <span><i></i> Toi</span>
@@ -554,61 +554,14 @@
           <span class="notch-corner notch-corner-left"></span>
           <span class="notch-corner notch-corner-right"></span>
           <div class="notch-panel">
-            <div class="notch-tabs" role="tablist">
-              <button class="notch-tab is-active" data-mode="upnext" role="tab">Up next</button>
-              <button class="notch-tab" data-mode="grades" role="tab">Grades</button>
-              <button class="notch-tab" data-mode="timer" role="tab">Focus timer</button>
-              <button class="notch-tab" data-mode="mirror" role="tab">Mirror</button>
-            </div>
-
             <div class="notch-content">
-              <!-- Mode 1: Up Next -->
-              <div class="notch-view is-active" data-view="upnext">
-                <div class="notch-lab"><span>Due soon</span><span>Thu 27</span></div>
-                <div style="margin-top:10px">
-                  <div class="check-row" data-tick><span class="box" data-box role="checkbox" aria-label="Marquer Maths p.72, no 4 à 9 comme terminé" aria-checked="false" tabindex="0"></span><span class="check-title">Maths p.72, no 4 à 9</span><span class="check-when">demain</span></div>
-                  <div class="check-row" data-tick><span class="box" data-box role="checkbox" aria-label="Marquer Examen chimie comme terminé" aria-checked="false" tabindex="0"></span><span class="check-title">Examen chimie, ch. 3 et 4</span><span class="check-when warm">4 jours</span></div>
-                  <div class="check-row" data-tick><span class="box" data-box role="checkbox" aria-label="Marquer Projet histoire comme terminé" aria-checked="false" tabindex="0"></span><span class="check-title">Projet histoire</span><span class="check-when">18 jours</span></div>
-                </div>
-                <div class="notch-foot"><span>Moyenne 84,2 %</span><span>Physique 71 % &#8595;</span></div>
+              <div class="notch-lab"><span>Up next</span><span>Jeudi</span></div>
+              <div style="margin-top:12px">
+                <div class="check-row" data-tick><span class="box" data-box role="checkbox" aria-label="Marquer Maths p.72, no 4 à 9 comme terminé" aria-checked="false" tabindex="0"></span><span class="check-title">Maths p.72, no 4 à 9</span><span class="check-when">demain</span></div>
+                <div class="check-row" data-tick><span class="box" data-box role="checkbox" aria-label="Marquer Examen chimie comme terminé" aria-checked="false" tabindex="0"></span><span class="check-title">Examen chimie, ch. 3 et 4</span><span class="check-when warm">4 jours</span></div>
+                <div class="check-row" data-tick><span class="box" data-box role="checkbox" aria-label="Marquer Projet histoire comme terminé" aria-checked="false" tabindex="0"></span><span class="check-title">Projet histoire</span><span class="check-when">18 jours</span></div>
               </div>
-
-              <!-- Mode 2: Grades -->
-              <div class="notch-view" data-view="grades">
-                <div class="notch-lab"><span>Current standing</span><span>Étape 1</span></div>
-                <div style="margin-top:14px">
-                  <div style="display:flex; justify-content:space-between; align-items:baseline">
-                    <span style="font-size:13px; color:var(--ink)">Moyenne générale</span>
-                    <span style="font-size:18px; color:var(--pop-green); font-weight:500" class="tnum">84,2 %</span>
-                  </div>
-                  <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:12px; color:var(--danger)">
-                    <span>À surveiller : Physique</span>
-                    <span class="tnum">71,0 % (moy. 80 %)</span>
-                  </div>
-                </div>
-                <div class="notch-foot" style="margin-top:20px"><span>3 étapes configurées</span><span>Pondération QC</span></div>
-              </div>
-
-              <!-- Mode 3: Focus Timer -->
-              <div class="notch-view" data-view="timer">
-                <div class="notch-lab"><span>Study block</span><span>Physique ch. 3</span></div>
-                <div class="timer-view">
-                  <div class="timer-readout" id="timerReadout">24:00</div>
-                  <div class="timer-actions">
-                    <button class="timer-btn primary" id="timerToggleBtn">Start</button>
-                    <button class="timer-btn" id="timerResetBtn">Reset</button>
-                  </div>
-                </div>
-                <div class="notch-foot" style="margin-top:6px"><span>Finish block</span><span>+1 feuille</span></div>
-              </div>
-
-              <!-- Mode 4: Mirror -->
-              <div class="notch-view" data-view="mirror">
-                <div class="notch-lab"><span>Quick glance mirror</span><span>Standby</span></div>
-                <div class="mirror-box" style="margin-top:8px">
-                  <span>Camera standby frame</span>
-                </div>
-              </div>
+              <div class="notch-foot"><span>Moyenne 84,2 %</span><span>Physique 71 % &#8595;</span></div>
             </div>
           </div>
         </div>

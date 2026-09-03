@@ -55,6 +55,7 @@
   --info-soft: #131e27;
   --violet: #ab8fce;
   --glow: rgba(143, 174, 134, 0.16);
+  --canvas-dots: rgba(255, 255, 255, 0.032);
 
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
   --spring: cubic-bezier(0.34, 1.4, 0.64, 1);
@@ -90,6 +91,7 @@
   --info-soft: #e4edf5;
   --violet: #6b5585;
   --glow: rgba(76, 111, 69, 0.12);
+  --canvas-dots: rgba(22, 21, 19, 0.042);
 }
 
 * { box-sizing: border-box; }
@@ -97,7 +99,10 @@ html { scroll-behavior: smooth; background: var(--canvas); transition: var(--the
 
 body {
   margin: 0;
-  background: var(--canvas);
+  background-color: var(--canvas);
+  background-image: radial-gradient(circle, var(--canvas-dots) 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-position: 0 0;
   color: var(--ink);
   font-family: "Feuillet Sans", "Feuillet Fallback", system-ui, -apple-system, sans-serif;
   font-size: 16px;
@@ -112,7 +117,7 @@ body::after {
   inset: 0;
   z-index: 90;
   pointer-events: none;
-  opacity: 0.027;
+  opacity: 0.03;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
@@ -452,17 +457,9 @@ a { color: inherit; text-decoration: none; }
 .capture.playing .scanlight { opacity: 1; animation: sweep 1750ms var(--ease) forwards; }
 .drafts { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 6px 16px 14px; }
 .drafts .lab { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 0 4px; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-3); }
-.draft { display: flex; align-items: center; gap: 12px; border-top: 1px solid var(--line-soft); padding: 12px 0; font-size: 14px; transition: opacity 320ms var(--ease), transform 380ms var(--spring), background 200ms ease; }
+.draft { display: flex; align-items: center; gap: 12px; border-top: 1px solid var(--line-soft); padding: 12px 0; font-size: 14px; transition: opacity 320ms var(--ease), transform 380ms var(--spring), color 200ms ease; }
 .draft .when { margin-left: auto; font-size: 11px; color: var(--ink-3); }
-.draft-confirm-btn {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 24px; height: 24px; padding: 0; border: 1px solid var(--line);
-  border-radius: 6px; background: var(--panel); color: var(--accent);
-  cursor: pointer; transition: all 180ms ease;
-}
-.draft-confirm-btn:hover { border-color: var(--accent); background: var(--accent-soft); transform: scale(1.1); }
-.draft.confirmed { opacity: 0.55; text-decoration: line-through; }
-.draft.confirmed .draft-confirm-btn { background: var(--pop-green); color: #10130f; border-color: var(--pop-green); }
+.draft.done { text-decoration: line-through; color: var(--ink-3); }
 .js .capture:not(.done) .draft { opacity: 0; transform: translateY(6px) scale(0.98); }
 
 /* --- the deadline that ages ----------------------------------------------- */
@@ -547,23 +544,6 @@ a { color: inherit; text-decoration: none; }
 .bar-avg { transition: bottom 320ms var(--ease), opacity 180ms ease, transform 300ms var(--spring); }
 .gc-delta.swap { opacity: 0; transform: translateY(3px); }
 
-/* Interactive Grade Steppers */
-.grade-steppers {
-  display: flex; gap: 4px; justify-content: center; margin-bottom: 6px;
-}
-.grade-btn {
-  width: 18px; height: 18px; padding: 0;
-  border: 1px solid var(--line); border-radius: 3px;
-  background: var(--surface); color: var(--ink-2);
-  font-size: 11px; font-weight: 500; cursor: pointer;
-  display: inline-flex; align-items: center; justify-content: center;
-  transition: all 140ms ease;
-}
-.grade-btn:hover {
-  background: var(--surface-2); color: var(--ink); border-color: var(--accent);
-  transform: scale(1.1);
-}
-
 /* --- the notch ------------------------------------------------------------ */
 .stage {
   position: relative; min-height: 340px; overflow: hidden;
@@ -582,7 +562,7 @@ a { color: inherit; text-decoration: none; }
 .notch-shell.is-open {
   --notch-bg: #0d0c0a;
   width: min(440px, 88%);
-  height: var(--notch-h, 276px);
+  height: 220px;
 }
 .notch-panel {
   position: relative; height: 100%; overflow: hidden;
@@ -609,47 +589,8 @@ a { color: inherit; text-decoration: none; }
   background: rgba(143, 174, 134, 0.75); opacity: 0.6;
 }
 
-/* Mode Switcher Tabs */
-.notch-tabs {
-  display: flex; gap: 4px; padding: 34px 16px 8px;
-  border-bottom: 1px solid var(--line-soft);
-}
-.notch-tab {
-  padding: 4px 10px; border-radius: 999px; font-size: 11px;
-  background: transparent; border: 1px solid transparent;
-  color: var(--ink-3); cursor: pointer; transition: all 180ms ease;
-}
-.notch-tab:hover { color: var(--ink-2); background: var(--surface); }
-.notch-tab.is-active { background: var(--surface-2); border-color: var(--line); color: var(--accent); }
-
-/* Tab Views */
-.notch-content { min-width: 310px; padding: 12px 18px 16px; transform: translateY(6px); opacity: 0; transition: opacity 180ms ease, transform 180ms ease; }
+.notch-content { min-width: 310px; padding: 26px 20px 16px; transform: translateY(6px); opacity: 0; transition: opacity 180ms ease, transform 180ms ease; }
 .notch-shell.is-open .notch-content { transform: none; opacity: 1; transition-delay: 240ms; }
-.notch-view { display: none; }
-.notch-view.is-active { display: block; animation: notchFade 200ms ease; }
-@keyframes notchFade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
-
-/* Timer View */
-.timer-view { text-align: center; padding: 10px 0 6px; }
-.timer-readout { font-size: 34px; font-weight: 400; font-variant-numeric: tabular-nums; letter-spacing: -0.03em; color: var(--ink); }
-.timer-actions { display: flex; justify-content: center; gap: 8px; margin-top: 10px; }
-.timer-btn {
-  padding: 5px 14px; border-radius: 6px; border: 1px solid var(--line);
-  background: var(--surface); color: var(--ink); font-size: 12px; cursor: pointer;
-  transition: all 160ms ease;
-}
-.timer-btn:hover { border-color: var(--accent); background: var(--surface-2); }
-.timer-btn.primary { background: var(--accent); color: #10130f; border-color: var(--accent); }
-.timer-btn.primary:hover { filter: brightness(1.08); }
-
-/* Mirror View */
-.mirror-box {
-  border-radius: 8px; border: 1px solid var(--line);
-  background: radial-gradient(circle, rgba(143, 174, 134, 0.08) 0%, rgba(0, 0, 0, 0.6) 80%);
-  height: 110px; display: flex; align-items: center; justify-content: center;
-  font-size: 12px; color: var(--ink-3);
-}
-
 .notch-lab { display: flex; justify-content: space-between; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-3); }
 
 /* --- source rows ---------------------------------------------------------- */

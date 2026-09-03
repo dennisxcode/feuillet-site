@@ -270,16 +270,7 @@
       scanzone.addEventListener('pointerdown', scrubLaser)
     }
 
-    /* Interactive Draft Confirmations */
-    capture.querySelectorAll('.draft-confirm-btn').forEach(function (btn) {
-      btn.addEventListener('click', function (e) {
-        e.stopPropagation()
-        var draft = btn.closest('.draft')
-        if (!draft || draft.classList.contains('confirmed')) return
-        draft.classList.add('confirmed')
-        flyLeaf(btn.getBoundingClientRect())
-      })
-    })
+
 
     var arm = function () {
       capture.classList.remove('playing', 'done')
@@ -523,110 +514,25 @@
       scrub.addEventListener('pointercancel', releaseGrade)
     }
 
-    /* Course Grade Micro-Steppers (+ / -) */
-    gradecard.querySelectorAll('.grade-btn').forEach(function (btn) {
-      btn.addEventListener('click', function (e) {
-        e.stopPropagation()
-        stopGradeAuto()
-        var courseIdx = parseInt(btn.getAttribute('data-course-index') || '0', 10)
-        var delta = parseFloat(btn.getAttribute('data-grade-adj') || '0')
-        var curEtape = ETAPES[at]
-        if (curEtape && curEtape.courses[courseIdx]) {
-          curEtape.courses[courseIdx].you = Math.max(0, Math.min(100, curEtape.courses[courseIdx].you + delta))
-          var sum = 0
-          curEtape.courses.forEach(function (c) { sum += c.you })
-          curEtape.avg = sum / curEtape.courses.length
-          paint(at, true)
-        }
-      })
-    })
   }
 
-  /* --- the notch: multi-mode panel with tabs, focus timer, and mirror ------ */
+  /* --- the notch ----------------------------------------------------------- */
   var notch = document.getElementById('notch')
   if (notch) {
-    var tabs = notch.querySelectorAll('.notch-tab')
-    var views = notch.querySelectorAll('.notch-view')
-    var heights = { upnext: '276px', grades: '210px', timer: '230px', mirror: '230px' }
-
-    tabs.forEach(function (tab) {
-      tab.addEventListener('click', function (e) {
-        e.stopPropagation()
-        var mode = tab.getAttribute('data-mode') || 'upnext'
-        tabs.forEach(function (t) { t.classList.toggle('is-active', t === tab) })
-        views.forEach(function (v) { v.classList.toggle('is-active', v.getAttribute('data-view') === mode) })
-        notch.style.setProperty('--notch-h', heights[mode] || '276px')
-        if (!notch.classList.contains('is-open')) notch.classList.add('is-open')
-      })
-    })
-
-    /* Focus Study Countdown Timer */
-    var timerReadout = document.getElementById('timerReadout')
-    var timerToggle = document.getElementById('timerToggleBtn')
-    var timerReset = document.getElementById('timerResetBtn')
-    var timerSecs = 24 * 60
-    var timerRunning = false
-    var timerInterval = null
-
-    function renderTimer() {
-      if (!timerReadout) return
-      var m = Math.floor(timerSecs / 60)
-      var s = timerSecs % 60
-      timerReadout.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s
-    }
-
-    if (timerToggle) {
-      timerToggle.addEventListener('click', function (e) {
-        e.stopPropagation()
-        timerRunning = !timerRunning
-        timerToggle.textContent = timerRunning ? (french ? 'Pause' : 'Pause') : (french ? 'Reprendre' : 'Start')
-        timerToggle.classList.toggle('primary', !timerRunning)
-        if (timerRunning) {
-          timerInterval = setInterval(function () {
-            if (timerSecs > 0) {
-              timerSecs--
-              renderTimer()
-            } else {
-              clearInterval(timerInterval)
-              timerRunning = false
-              timerToggle.textContent = french ? 'Terminé !' : 'Done!'
-              flyLeaf(timerToggle.getBoundingClientRect())
-            }
-          }, 1000)
-        } else {
-          clearInterval(timerInterval)
-        }
-      })
-    }
-
-    if (timerReset) {
-      timerReset.addEventListener('click', function (e) {
-        e.stopPropagation()
-        clearInterval(timerInterval)
-        timerRunning = false
-        timerSecs = 24 * 60
-        renderTimer()
-        if (timerToggle) {
-          timerToggle.textContent = french ? 'Démarrer' : 'Start'
-          timerToggle.classList.add('primary')
-        }
-      })
-    }
-
     if (reduced) {
       notch.classList.add('is-open')
     } else {
       var held = false
       var beat = null
-      notch.addEventListener('pointerenter', function () { held = true })
+      notch.addEventListener('pointerenter', function () { held = true; notch.classList.add('is-open') })
       notch.addEventListener('pointerleave', function () { held = false })
       whileSeen(document.getElementById('stage'), function (visible) {
         clearInterval(beat)
         if (!visible) return
         setTimeout(function () { notch.classList.add('is-open') }, 260)
         beat = setInterval(function () {
-          if (!held && !timerRunning) notch.classList.toggle('is-open')
-        }, 5600)
+          if (!held) notch.classList.toggle('is-open')
+        }, 5200)
       }, 0.3)
     }
   }
