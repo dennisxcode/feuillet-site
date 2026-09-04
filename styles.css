@@ -23,75 +23,78 @@
 }
 
 :root {
-  --canvas: #0a0908;
-  --panel: #100f0d;
-  --surface: #161411;
-  --surface-2: #201d18;
-  --line: #2b2721;
-  --line-soft: #211e19;
-  --ink: #f0ede7;
-  --ink-2: #a29e97;
-  --ink-3: #827e76;
+  /* Attio-Grade Obsidian & Graphite Palette */
+  --canvas: #090a0c;
+  --panel: #0e1013;
+  --surface: #131519;
+  --surface-2: #1a1d23;
+  --surface-hover: #22262f;
+  --line: #22252c;
+  --line-soft: #191b20;
+  --line-bright: rgba(255, 255, 255, 0.14);
+  --ink: #f5f5f7;
+  --ink-2: #9da2ad;
+  --ink-3: #6b7280;
 
-  --accent: #8fae86;
-  --accent-bright: #b3d4a8;
-  --accent-dim: #33402f;
-  --accent-soft: #171c15;
+  --accent: #10b981;
+  --accent-bright: #34d399;
+  --accent-dim: #064e3b;
+  --accent-soft: rgba(16, 185, 129, 0.09);
 
-  /* The data colours are deliberately hotter than the interface accent.
-     A bar chart tinted with the same muted sage as the page reads as
-     decoration; a mark that has fallen off should be the loudest thing on
-     the card, because it is the one thing the app raises on its own. */
-  --pop-green: #58d68d;
-  --pop-green-2: #2f8f5b;
-  --pop-red: #ff6b5b;
-  --pop-red-2: #a8362a;
+  --pop-green: #10b981;
+  --pop-green-2: #059669;
+  --pop-red: #ef4444;
+  --pop-red-2: #dc2626;
 
-  --amber: #c9a15f;
-  --amber-soft: #241d12;
-  --danger: #cc7367;
-  --danger-soft: #251512;
-  --info: #7fa8c9;
-  --info-soft: #131e27;
-  --violet: #ab8fce;
-  --glow: rgba(143, 174, 134, 0.16);
-  --canvas-dots: rgba(255, 255, 255, 0.032);
+  --amber: #f59e0b;
+  --amber-soft: rgba(245, 158, 11, 0.09);
+  --danger: #ef4444;
+  --danger-soft: rgba(239, 68, 68, 0.09);
+  --info: #3b82f6;
+  --info-soft: rgba(59, 130, 246, 0.09);
+  --violet: #8b5cf6;
+  --glow: rgba(16, 185, 129, 0.16);
+  --canvas-dots: rgba(255, 255, 255, 0.038);
 
+  --bento-radius: 16px;
+  --bento-radius-lg: 22px;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
   --spring: cubic-bezier(0.34, 1.4, 0.64, 1);
   --theme-transition: background-color 350ms ease, color 350ms ease, border-color 350ms ease;
 }
 
 [data-theme="light"] {
-  --canvas: #f8f5ef;
-  --panel: #f1ebdF;
-  --surface: #e9e1d1;
-  --surface-2: #ded4c0;
-  --line: #d5c8b2;
-  --line-soft: #e2d7c4;
-  --ink: #161513;
-  --ink-2: #48443e;
-  --ink-3: #757067;
+  --canvas: #f8f9fa;
+  --panel: #ffffff;
+  --surface: #f1f3f6;
+  --surface-2: #e4e7ec;
+  --surface-hover: #d5d9e0;
+  --line: #e2e4e9;
+  --line-soft: #eceef2;
+  --line-bright: rgba(0, 0, 0, 0.14);
+  --ink: #0f172a;
+  --ink-2: #475569;
+  --ink-3: #94a3b8;
 
-  --accent: #4c6f45;
-  --accent-bright: #395733;
-  --accent-dim: #b8cfb2;
-  --accent-soft: #eaf1e7;
+  --accent: #059669;
+  --accent-bright: #047857;
+  --accent-dim: #a7f3d0;
+  --accent-soft: rgba(5, 150, 105, 0.09);
 
-  --pop-green: #2a8a53;
-  --pop-green-2: #1e643c;
-  --pop-red: #c94032;
-  --pop-red-2: #8f261c;
+  --pop-green: #059669;
+  --pop-green-2: #047857;
+  --pop-red: #dc2626;
+  --pop-red-2: #b91c1c;
 
-  --amber: #a87220;
-  --amber-soft: #f8ede0;
-  --danger: #b84435;
-  --danger-soft: #fae8e5;
-  --info: #386485;
-  --info-soft: #e4edf5;
-  --violet: #6b5585;
-  --glow: rgba(76, 111, 69, 0.12);
-  --canvas-dots: rgba(22, 21, 19, 0.042);
+  --amber: #d97706;
+  --amber-soft: #fef3c7;
+  --danger: #dc2626;
+  --danger-soft: #fee2e2;
+  --info: #2563eb;
+  --info-soft: #dbeafe;
+  --violet: #7c3aed;
+  --glow: rgba(5, 150, 105, 0.14);
+  --canvas-dots: rgba(0, 0, 0, 0.045);
 }
 
 * { box-sizing: border-box; }
@@ -201,8 +204,334 @@ a { color: inherit; text-decoration: none; }
 @media (max-width: 760px) { .hide-sm { display: none; } }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 3px; }
 
+/* ===========================================================================
+   ATTIO-STYLE BENTO GRID SYSTEM & CURSOR ILLUMINATION
+   ======================================================================== */
+.bento-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+  width: 100%;
+}
+@media (min-width: 860px) {
+  .bento-grid {
+    grid-template-columns: repeat(12, 1fr);
+    gap: 20px;
+  }
+}
+
+.bento-card {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--bento-radius);
+  overflow: hidden;
+  transition: transform 280ms var(--ease), border-color 280ms ease, box-shadow 280ms ease;
+  box-shadow: 0 4px 20px -8px rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+}
+
+.bento-card:hover {
+  border-color: var(--line-bright);
+  transform: translateY(-2px);
+  box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.65);
+}
+
+.js .bento-card {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 650ms var(--ease), transform 650ms var(--ease), border-color 280ms ease, box-shadow 280ms ease;
+  transition-delay: calc(var(--delay, 0) * 90ms);
+}
+.js .bento-grid.on .bento-card,
+.js .bento-card.on {
+  opacity: 1;
+  transform: none;
+}
+
+/* Attio Hardware Cursor-following border glow */
+.bento-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(
+    480px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255, 255, 255, 0.22),
+    transparent 45%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 240ms ease;
+  z-index: 5;
+}
+.bento-card:hover::before {
+  opacity: 1;
+}
+
+[data-theme="light"] .bento-card::before {
+  background: radial-gradient(
+    480px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(0, 0, 0, 0.16),
+    transparent 45%
+  );
+}
+
+/* Bento Column Spans */
+.bento-col-12 { grid-column: 1 / -1; }
+.bento-col-8 { grid-column: 1 / -1; }
+.bento-col-7 { grid-column: 1 / -1; }
+.bento-col-6 { grid-column: 1 / -1; }
+.bento-col-5 { grid-column: 1 / -1; }
+.bento-col-4 { grid-column: 1 / -1; }
+
+@media (min-width: 860px) {
+  .bento-col-8 { grid-column: span 8; }
+  .bento-col-7 { grid-column: span 7; }
+  .bento-col-6 { grid-column: span 6; }
+  .bento-col-5 { grid-column: span 5; }
+  .bento-col-4 { grid-column: span 4; }
+  .bento-row-2 { grid-row: span 2; }
+}
+
+/* Bento Header & Text */
+.bento-head {
+  padding: 24px 26px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.bento-head.split {
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.bento-body {
+  padding: 0 26px 26px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.bento-title {
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  line-height: 1.25;
+}
+.bento-desc {
+  font-size: 14px;
+  color: var(--ink-2);
+  line-height: 1.55;
+}
+
+/* Bento Inner Module Adapters */
+.bento-card .capture-grid { display: grid; gap: 20px; align-items: center; }
+@media (min-width: 780px) { .bento-card .capture-grid { grid-template-columns: 1.05fr 0.95fr; gap: 24px; } }
+.bento-card .gradecard { border: 0; background: transparent; box-shadow: none; }
+.bento-card .stage { border: 0; min-height: 240px; box-shadow: none; background: transparent; }
+.bento-card .aging { border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin-top: auto; }
+.bento-card .flow { max-height: 460px; }
+
+/* Attio-Style Micro-Tags & Telemetry Pills */
+.attio-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10.5px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-2);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  padding: 3px 9px;
+  border-radius: 999px;
+  width: fit-content;
+}
+.attio-tag .dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 6px var(--accent);
+}
+.attio-tag.amber .dot { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+.attio-tag.danger .dot { background: var(--pop-red); box-shadow: 0 0 6px var(--pop-red); }
+.attio-tag.info .dot { background: var(--info); box-shadow: 0 0 6px var(--info); }
+
+/* Attio Trust Ribbon / Portal Badges */
+.portal-ticker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+.portal-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: var(--ink-2);
+  transition: all 180ms ease;
+}
+.portal-pill:hover {
+  border-color: var(--accent);
+  color: var(--ink);
+  background: var(--surface);
+  transform: translateY(-1px);
+}
+.portal-pill i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* Attio Metric / Telemetry Stat Tile */
+.stat-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  height: 100%;
+  padding: 8px 0;
+}
+.stat-num {
+  font-size: 34px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--ink);
+}
+.stat-label {
+  font-size: 12px;
+  color: var(--ink-3);
+  line-height: 1.4;
+}
+
+/* Attio Module 1: AI Subject Classifier List */
+.classifier-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+}
+.classifier-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  font-size: 12px;
+  transition: all 180ms ease;
+}
+.classifier-item:hover {
+  border-color: var(--accent);
+  background: var(--surface-2);
+}
+.classifier-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.classifier-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.classifier-right {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 10px;
+  color: var(--accent);
+}
+
+/* Attio Module 2: Local SQLite Vault Telemetry */
+.vault-badges {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: auto;
+}
+.vault-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.vault-row svg {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+/* Attio Module 3: Workload Collision Warning */
+.collision-box {
+  border-radius: 10px;
+  background: linear-gradient(180deg, var(--amber-soft), var(--panel));
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  padding: 14px;
+  margin-top: auto;
+}
+.collision-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--amber);
+}
+.collision-desc {
+  font-size: 11.5px;
+  color: var(--ink-2);
+  margin-top: 6px;
+  line-height: 1.45;
+}
+
+/* Attio Module 4: Multi-Device Real-Time Sync */
+.sync-devices {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+}
+.sync-device {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  font-size: 12px;
+}
+.sync-device-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink);
+}
+.sync-device-status {
+  font-size: 10.5px;
+  color: var(--ink-3);
+  font-family: ui-monospace, SFMono-Regular, monospace;
+}
+
 /* Dynamic Card Specular Highlights & Glass Sheen */
-.appwin, .live-frame, .attention-card, .close-band, .notch-shell, .split-col, .tile {
+.appwin, .live-frame, .bento-card, .close-band, .notch-shell, .split-col, .tile {
   background-image: radial-gradient(550px circle at var(--mx, 50%) var(--my, 0%), rgba(255, 255, 255, 0.045), transparent 68%);
 }
 

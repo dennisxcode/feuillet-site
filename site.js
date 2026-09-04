@@ -99,9 +99,9 @@
     })
   })
 
-  /* --- reveals ------------------------------------------------------------ */
+  /* --- reveals & bento cards ---------------------------------------------- */
   if (reduced) {
-    document.querySelectorAll('.reveal, .words').forEach(function (el) { el.classList.add('on') })
+    document.querySelectorAll('.reveal, .words, .bento-card, .bento-grid').forEach(function (el) { el.classList.add('on') })
   } else {
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
@@ -112,10 +112,27 @@
           kid.style.transitionDelay = (i * 70) + 'ms'
           kid.classList.add('on')
         })
+        el.querySelectorAll('.bento-card').forEach(function (card, i) {
+          card.style.setProperty('--delay', i)
+          card.classList.add('on')
+        })
         io.unobserve(el)
       })
     }, { rootMargin: '0px 0px -10% 0px', threshold: 0.06 })
-    document.querySelectorAll('section, .reveal, .words').forEach(function (el) { io.observe(el) })
+    document.querySelectorAll('section, .reveal, .words, .bento-grid, .bento-card').forEach(function (el) { io.observe(el) })
+  }
+
+  /* Attio-style dynamic border glow tracking */
+  if (canHover && !reduced) {
+    document.querySelectorAll('.bento-card').forEach(function (card) {
+      card.addEventListener('pointermove', function (e) {
+        var rect = card.getBoundingClientRect()
+        var x = e.clientX - rect.left
+        var y = e.clientY - rect.top
+        card.style.setProperty('--mouse-x', x + 'px')
+        card.style.setProperty('--mouse-y', y + 'px')
+      })
+    })
   }
 
   /* --- counters ------------------------------------------------------------
