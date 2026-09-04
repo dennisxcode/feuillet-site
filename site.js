@@ -135,6 +135,25 @@
     })
   }
 
+  /* --- live-frame scroll pitch physics ------------------------------------- */
+  var liveFrame = document.querySelector('.live-frame')
+  if (liveFrame && !reduced) {
+    var updateLiveFramePitch = function () {
+      var r = liveFrame.getBoundingClientRect()
+      var viewH = window.innerHeight
+      var progress = (r.top + r.height * 0.5 - viewH * 0.5) / (viewH * 0.5)
+      var clamped = Math.max(-1, Math.min(1, progress))
+      var pitch = clamped * 7.5
+      var scale = 1 - Math.abs(clamped) * 0.02
+      liveFrame.style.setProperty('--frame-pitch', pitch.toFixed(2) + 'deg')
+      liveFrame.style.setProperty('--frame-scale', scale.toFixed(3))
+    }
+    window.addEventListener('scroll', function () {
+      requestAnimationFrame(updateLiveFramePitch)
+    }, { passive: true })
+    updateLiveFramePitch()
+  }
+
   /* --- counters ------------------------------------------------------------
      Comma decimals, because every number on this site is French. */
   function countTo(el, to, decimals, suffix, duration) {
@@ -153,7 +172,7 @@
     requestAnimationFrame(frame)
   }
 
-  /* --- the app window: entrance, then a tilt toward the pointer ----------- */
+  /* --- the app window: entrance, then multi-layer 3D tilt & specular ray --- */
   var appwin = document.querySelector('.appwin')
   if (appwin) {
     var rows = appwin.querySelectorAll('.check-row')
@@ -162,13 +181,50 @@
 
     if (canHover && !reduced) {
       var tilt = appwin.closest('.tilt') || appwin.parentElement
+      var targetRotX = 0
+      var targetRotY = 0
+      var curRotX = 0
+      var curRotY = 0
+      var isHovering = false
+      var rafId = null
+
+      function updateTiltLoop() {
+        curRotX += (targetRotX - curRotX) * 0.1
+        curRotY += (targetRotY - curRotY) * 0.1
+        appwin.style.transform = 'rotateY(' + curRotY.toFixed(2) + 'deg) rotateX(' + curRotX.toFixed(2) + 'deg) translateZ(0)'
+
+        if (isHovering || Math.abs(curRotX) > 0.02 || Math.abs(curRotY) > 0.02) {
+          rafId = requestAnimationFrame(updateTiltLoop)
+        } else {
+          appwin.style.transform = ''
+          rafId = null
+        }
+      }
+
       tilt.addEventListener('pointermove', function (e) {
         var r = tilt.getBoundingClientRect()
         var x = (e.clientX - r.left) / r.width - 0.5
         var y = (e.clientY - r.top) / r.height - 0.5
-        appwin.style.transform = 'rotateY(' + (x * 4).toFixed(2) + 'deg) rotateX(' + (-y * 3).toFixed(2) + 'deg) translateZ(0)'
+        targetRotY = x * 8.5
+        targetRotX = -y * 7.0
+
+        // Coordinate dynamic specular sheen on the glass
+        var specX = ((e.clientX - r.left) / r.width) * 100
+        var specY = ((e.clientY - r.top) / r.height) * 100
+        appwin.style.setProperty('--spec-x', specX.toFixed(1) + '%')
+        appwin.style.setProperty('--spec-y', specY.toFixed(1) + '%')
+
+        if (!isHovering) {
+          isHovering = true
+          if (!rafId) rafId = requestAnimationFrame(updateTiltLoop)
+        }
       })
-      tilt.addEventListener('pointerleave', function () { appwin.style.transform = '' })
+
+      tilt.addEventListener('pointerleave', function () {
+        isHovering = false
+        targetRotX = 0
+        targetRotY = 0
+      })
     }
   }
 
@@ -582,15 +638,45 @@
       tile.style.setProperty('--my', (e.clientY - r.top) + 'px')
     }, { passive: true })
 
-    /* The main calls to action lean toward the pointer as it approaches. */
-    document.querySelectorAll('.btn-primary, .pilot-target').forEach(function (btn) {
+    /* The main calls to action lean toward the pointer with spring physics and light refraction. */
+    document.querySelectorAll('.btn-primary, .pilot-target, .download-menu summary, .nav-cta').forEach(function (btn) {
+      var bTargetX = 0, bTargetY = 0, bCurX = 0, bCurY = 0
+      var bHovering = false, bRaf = null
+
+      function springBtn() {
+        bCurX += (bTargetX - bCurX) * 0.18
+        bCurY += (bTargetY - bCurY) * 0.18
+        btn.style.transform = 'translate(' + bCurX.toFixed(2) + 'px,' + bCurY.toFixed(2) + 'px)'
+        if (bHovering || Math.abs(bCurX) > 0.05 || Math.abs(bCurY) > 0.05) {
+          bRaf = requestAnimationFrame(springBtn)
+        } else {
+          btn.style.transform = ''
+          bRaf = null
+        }
+      }
+
       btn.addEventListener('pointermove', function (e) {
         var r = btn.getBoundingClientRect()
-        var x = (e.clientX - r.left - r.width / 2) / r.width
-        var y = (e.clientY - r.top - r.height / 2) / r.height
-        btn.style.transform = 'translate(' + (x * 7).toFixed(1) + 'px,' + (y * 5).toFixed(1) + 'px)'
+        var x = (e.clientX - r.left - r.width / 2) / (r.width / 2)
+        var y = (e.clientY - r.top - r.height / 2) / (r.height / 2)
+        bTargetX = x * 7.5
+        bTargetY = y * 5.5
+
+        var mx = ((e.clientX - r.left) / r.width) * 100
+        var my = ((e.clientY - r.top) / r.height) * 100
+        btn.style.setProperty('--btn-x', mx.toFixed(1) + '%')
+        btn.style.setProperty('--btn-y', my.toFixed(1) + '%')
+
+        if (!bHovering) {
+          bHovering = true
+          if (!bRaf) bRaf = requestAnimationFrame(springBtn)
+        }
       })
-      btn.addEventListener('pointerleave', function () { btn.style.transform = '' })
+      btn.addEventListener('pointerleave', function () {
+        bHovering = false
+        bTargetX = 0
+        bTargetY = 0
+      })
     })
   }
 
